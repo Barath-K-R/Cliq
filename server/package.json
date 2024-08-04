@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "type":"module",
+  "type": "module",
   "scripts": {
-    "start":"nodemon index.js"
+    "start": "nodemon index.js"
   },
   "keywords": [],
   "author": "",
@@ -17,6 +17,7 @@
     "express": "^4.19.2",
     "mongoose": "^8.5.1",
     "mysql": "^2.18.1",
+    "mysql2": "^3.11.0",
     "nodemon": "^3.1.4"
   }
 }

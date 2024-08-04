@@ -9,25 +9,12 @@ const ChatBox = ({ chat, currentUser, setSendMessage, receivedMessage }) => {
   const handleChange = (e) => {
     setNewMessage(e.target.value);
   };
-  //fetching user data
-  useEffect(() => {
-    const fetchuser = async () => {
-      const id = chat?.members?.find((id) => id !== currentUser);
-      try {
-        const { data } = await getUser(id);
-        setUserData(data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    if (chat !== null) fetchuser();
-  }, [chat, currentUser]);
 
   // fetch messages
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const { data } = await getMessages(chat._id);
+        const { data } = await getMessages(chat.chat_id);
         console.log(data);
         setMessages(data);
       } catch (error) {
@@ -39,19 +26,22 @@ const ChatBox = ({ chat, currentUser, setSendMessage, receivedMessage }) => {
   }, [chat]);
 
   const handleSend = async (e) => {
+    
     e.preventDefault();
     const message = {
       senderId: currentUser,
       text: newMessage,
-      chatId: chat._id,
+      chatId: chat.chat_id,
     };
-    const receiverId = chat.members.find((id) => id !== currentUser);
+    const receiverId = chat?.user_id;
+
     // send message to socket server
     setSendMessage({ ...message, receiverId });
 
     // send message to database
     try {
       const { data } = await addMessage(message);
+      console.log(data)
       setMessages([...messages, data]);
       setNewMessage("");
     } catch {
@@ -62,7 +52,7 @@ const ChatBox = ({ chat, currentUser, setSendMessage, receivedMessage }) => {
   // Receive Message from parent component
   useEffect(() => {
     console.log("Message Arrived: ", receivedMessage);
-    if (receivedMessage !== null && receivedMessage.chatId === chat._id) {
+    if (receivedMessage !== null && receivedMessage.chatId === chat?.chat_id) {
       setMessages([...messages, receivedMessage]);
     }
   }, [receivedMessage]);
@@ -70,11 +60,11 @@ const ChatBox = ({ chat, currentUser, setSendMessage, receivedMessage }) => {
   return (
     <div className="flex flex-col h-full w-full bg-slate-100">
       <div className="flex-10 flex items-center h-12 border border-solid border-gray-500 shadow-2xl bg-white p-4">
-        <h1>{userData?.username}</h1>
+        <h1>{chat?.username}</h1>
       </div>
       <div className="flex-1 flex flex-col gap-4 bg-white p-4">
         {messages.map((message, index) => {
-          const isCurrentUser = message.senderId === currentUser;
+          const isCurrentUser = message.sender_id === currentUser;
           return (
             <div
               key={index}

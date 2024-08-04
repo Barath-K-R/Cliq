@@ -32,7 +32,6 @@ const io = new Server(8800, {
     // send message to a specific user
     socket.on("send-message", (data) => {
       const { receiverId } = data;
-      console.log(activeUsers)
       const user = activeUsers.find((user) => user.userId === receiverId);
       console.log("Sending from socket to :", user)
       if (user) {

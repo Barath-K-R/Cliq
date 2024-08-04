@@ -16,8 +16,8 @@ const Auth = () => {
     e.preventDefault()
     try {
       const response = await loginUser(formData);
-      console.log(response);
-      setUser(response.data.user);
+      console.log(response.data);
+      setUser(response.data);
       navigate('/');
     } catch (error) {
         console.log(error);

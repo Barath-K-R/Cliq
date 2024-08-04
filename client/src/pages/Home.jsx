@@ -17,19 +17,20 @@ const Home = () => {
   useEffect(() => {
     const getChats = async () => {
       try {
-        const { data } = await userChats(user._id);
+        const { data } = await userChats(user.user_id);
+        console.log(data)
         setChats(data);
       } catch (error) {
         console.log(error);
       }
     };
     getChats();
-  }, [user?._id]);
+  }, [user?.user_id]);
 
   // Connect to Socket.io
   useEffect(() => {
     socket.current = io("http://localhost:8800");
-    socket.current.emit("new-user-add", user._id);
+    socket.current.emit("new-user-add", user.user_id);
     socket.current.on("get-users", (users) => {
       setOnlineUsers(users);
     });
@@ -41,6 +42,7 @@ const Home = () => {
 
   // Send Message to socket server
   useEffect(() => {
+    console.log(sendMessage)
     if (sendMessage !== null) {
       console.log("emitting")
       socket.current.emit("send-message", sendMessage);
@@ -57,7 +59,7 @@ const Home = () => {
   return (
     <>
       <div className="flex w-full">
-        <div className="flex flex-col w-20 bg-black">
+        <div className="flex flex-col items-center w-20 pt-4 gap-4 bg-black">
           {chats.map((chat) => {
             return (
               <Conversations
@@ -72,7 +74,7 @@ const Home = () => {
 
         <ChatBox
           chat={currentChat}
-          currentUser={user._id}
+          currentUser={user.user_id}
           setSendMessage={setSendMessage}
           receivedMessage={receivedMessage}
         />
