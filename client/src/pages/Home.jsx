@@ -59,7 +59,12 @@ const Home = () => {
   return (
     <>
       <div className="flex w-full">
-        <div className="flex flex-col items-center w-20 pt-4 gap-4 bg-black">
+        <div className="flex flex-col items-center w-56 pt-4 gap-4 bg-black">
+          <section className="">
+          <span className="text-base text-white">Conversations  </span>
+          <span className="text-gray-50">+</span>
+          </section>
+          
           {chats.map((chat) => {
             return (
               <Conversations
