@@ -31,12 +31,19 @@ const io = new Server(8800, {
   
     // send message to a specific user
     socket.on("send-message", (data) => {
-      const { receiverId } = data;
-      const user = activeUsers.find((user) => user.userId === receiverId);
-      console.log("Sending from socket to :", user)
-      if (user) {
-        console.log("user exissssssssssssssts")
-        io.to(user.socketId).emit("recieve-message", data);
+      console.log('ACTIVE USERS')
+      console.log(activeUsers)
+      console.log(data)
+      const {userIds}=data
+      console.log(userIds)
+      const users=activeUsers.filter(user=>userIds.includes(user.userId));
+      console.log(users)
+      if (users.length!=0) {
+        users.forEach(user => {
+          console.log('sending to '+user+' to this '+user.socketId)
+          io.to(user.socketId).emit("recieve-message", data);
+        });
+        
       }
     });
   });

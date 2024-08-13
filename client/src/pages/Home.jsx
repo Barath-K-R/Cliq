@@ -4,33 +4,45 @@ import ChatBox from "../components/ChatBox.jsx";
 import { io } from "socket.io-client";
 import { useAuth } from "../context/AuthContext.js";
 import { userChats } from "../api/ChatApi.js";
+import { useSelector } from "react-redux";
 const Home = () => {
-  const { user } = useAuth();
+  
   const [chats, setChats] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [currentChat, setCurrentChat] = useState(null);
   const [sendMessage, setSendMessage] = useState(null);
   const [receivedMessage, setReceivedMessage] = useState(null);
-  const socket = useRef();
 
+  const user=useSelector(state=>state.user.authUser)
+  const selection=useSelector(state=>state.selection.selection)
+  const socket = useRef();
   // Get the chat in chat section
   useEffect(() => {
     const getChats = async () => {
+      let response;
       try {
-        const { data } = await userChats(user.user_id);
-        console.log(data)
-        setChats(data);
+        switch (selection) {
+          case 'direct':
+            response= await userChats(user.id,selection);
+            break;
+          case 'group':
+            response=await userChats(user.id,selection);
+            break;
+          default:
+            break;
+        }
+        setChats(response.data);
       } catch (error) {
         console.log(error);
       }
     };
     getChats();
-  }, [user?.user_id]);
+  }, [selection]);
 
   // Connect to Socket.io
   useEffect(() => {
     socket.current = io("http://localhost:8800");
-    socket.current.emit("new-user-add", user.user_id);
+    socket.current.emit("new-user-add", user.id);
     socket.current.on("get-users", (users) => {
       setOnlineUsers(users);
     });
@@ -52,7 +64,8 @@ const Home = () => {
   // Get the message from socket server
   useEffect(() => {
     socket.current.on("recieve-message", (data) => {
-      console.log(data);
+      console.log('recieved message');
+      console.log(data)
       setReceivedMessage(data);
     });
   }, []);
@@ -69,7 +82,7 @@ const Home = () => {
             return (
               <Conversations
                 chat={chat}
-                currentUser={user._id}
+                currentUserId={user.id}
                 setCurrentChat={setCurrentChat}
                 key={chat._id}
               />
@@ -79,7 +92,7 @@ const Home = () => {
 
         <ChatBox
           chat={currentChat}
-          currentUser={user.user_id}
+          currentUser={user}
           setSendMessage={setSendMessage}
           receivedMessage={receivedMessage}
         />

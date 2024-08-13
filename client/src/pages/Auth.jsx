@@ -2,22 +2,31 @@ import React, { useState } from "react";
 import { loginUser } from "../api/authApi";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import {useDispatch } from 'react-redux';
 const Auth = () => {
   const [formData, setFormData] = useState({ username: "", password: "" });
+  const dispatch = useDispatch();
   const {login,setUser}=useAuth();
   const navigate=useNavigate()
+
+  const dispatchUser=(user)=>{
+      dispatch({type:'ADD_USER',payload:user})
+  }
+
   const handleChange = (e) => {
     setFormData((prev) => {
       return { ...prev, [e.target.name]: e.target.value };
     });
   };
 
+  //subitting 
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
       const response = await loginUser(formData);
       console.log(response.data);
       setUser(response.data);
+      dispatchUser(response.data)
       navigate('/');
     } catch (error) {
         console.log(error);
