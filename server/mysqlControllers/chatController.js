@@ -1,18 +1,18 @@
 import mysqldb from '../config/mysqlConfig.js'
 
 export const creatingChat = async (req, res) => {
-  const {userIds,chatType,name}=req.body;
-  if (!chatType || !['direct', 'group'].includes(chatType)) {
+  const {chatType,name,description,userIds}=req.body;
+  if (!chatType || !['direct', 'group','channel'].includes(chatType)) {
     return res.status(400).json({ error: 'Invalid chat type' });
   }
   let groupName='';
-  if(chatType==='group')
+  if(chatType==='group' || chatType==='channel')
     groupName=name;
  
 
-  let query='insert into chats (chat_type,name) values (?,?)'
+  let query='insert into chats (chat_type,name,description) values (?,?,?)'
 
-  mysqldb.query(query,[chatType,groupName],(err,results)=>{
+  mysqldb.query(query,[chatType,groupName,description],(err,results)=>{
     if(err) throw err;
     const chatId = results.insertId;
 

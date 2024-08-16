@@ -1,0 +1,8 @@
+.create-chat-modal{
+    box-shadow: 0px 4px 8px 0 rgba(0, 0, 0, 0.4);
+    border-radius: 3px;
+}
+.create-chat-modal>section:hover{
+    color:rgb(14, 163, 237);
+    background-color: rgba(86, 198, 241, 0.2);
+}

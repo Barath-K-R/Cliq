@@ -1,12 +1,13 @@
 import mysqldb from "../config/mysqlConfig.js";
 
 export const addingMessage = async (req, res) => {
-  const { chatId, senderId, text } = req.body;
-  let query='insert into messages (chat_id,sender_id,text) values (?,?,?)';
+  console.log('adding mesage')
+  const { chatId,chatType,senderId, message } = req.body;
+  let query='insert into messages (chat_id,chat_type,sender_id,message) values (?,?,?,?)';
 
-  mysqldb.query(query,[chatId,senderId,text],(err,results)=>{
+  mysqldb.query(query,[chatId,chatType,senderId,message],(err,results)=>{
       if(err) throw err;
-      
+      console.log(results.insertId)
       mysqldb.query('select * from messages where id=?',[results.insertId],(err,results)=>{
           if(err) throw err;
           res.send(results[0]);
@@ -16,7 +17,7 @@ export const addingMessage = async (req, res) => {
 
 export const getChatMessages = async (req, res) => {
   const { chatId } = req.params;
-  let query=`select m.id,m.chat_id,m.sender_id,m.text,u.username from messages m
+  let query=`select m.id,m.chat_id,m.sender_id,m.message,u.username from messages m
               join users u on m.sender_id=u.id
               where chat_id=?`;
 

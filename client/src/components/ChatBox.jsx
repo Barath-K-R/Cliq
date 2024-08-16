@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getUser } from "../api/UserApi";
 import { getMessages, addMessage, retrieveMembers } from "../api/ChatApi";
-const ChatBox = ({ chat, currentUser, setSendMessage, receivedMessage }) => {
+const ChatBox = ({ chat, currentUser,chatType, setSendMessage, receivedMessage }) => {
   const [isGroup, setIsGroup] = useState(false);
   const [groupMembers, setGroupMembers] = useState([]);
   const [messages, setMessages] = useState([]);
@@ -31,6 +31,7 @@ const ChatBox = ({ chat, currentUser, setSendMessage, receivedMessage }) => {
     const fetchMessages = async () => {
       try {
         const { data } = await getMessages(chat?.chat_id);
+        console.log(data)
         setMessages(data);
       } catch (error) {
         console.log(error);
@@ -48,8 +49,9 @@ const ChatBox = ({ chat, currentUser, setSendMessage, receivedMessage }) => {
     const message = {
       username:currentUser.username,
       senderId: currentUser.id,
-      text: newMessage,
+      message: newMessage,
       chatId: chat.chat_id,
+      chatType:chatType
     };
 
     // send message to socket server
@@ -58,6 +60,7 @@ const ChatBox = ({ chat, currentUser, setSendMessage, receivedMessage }) => {
     // send message to database
     try {
       const { data } = await addMessage(message);
+      console.log(data)
       setMessages([...messages, data]);
       setNewMessage("");
     } catch {
@@ -91,7 +94,7 @@ const ChatBox = ({ chat, currentUser, setSendMessage, receivedMessage }) => {
               }`}
             >
               <span className="font-bold">{isGroup && message.username}</span>
-              <p>{message.text}</p>
+              <p>{message.message}</p>
             </div>
           );
         })}
