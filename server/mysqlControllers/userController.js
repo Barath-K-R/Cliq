@@ -40,3 +40,13 @@ export const gettingUser=async(req,res)=>{
         res.send(results[0]);
     })
 }
+
+export const getAllOrgusers=async(req,res)=>{
+    const {orgId}=req.params;
+    let query='select * from users where organization_id=?'
+
+    mysqldb.query(query,[id],(err,results)=>{
+        if(err) throw err;
+        res.send(results[0]);
+    })
+}

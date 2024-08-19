@@ -1,6 +1,9 @@
 import React, { useRef, useState, useEffect } from "react";
+
 import Conversations from "../components/Conversations.jsx";
 import ChatBox from "../components/ChatBox.jsx";
+import UserSearchModal from "../components/UserSearchModal.jsx";
+
 import { io } from "socket.io-client";
 import { useAuth } from "../context/AuthContext.js";
 import { userChats } from "../api/ChatApi.js";
@@ -17,6 +20,7 @@ const Home = () => {
   const [sendMessage, setSendMessage] = useState(null);
   const [receivedMessage, setReceivedMessage] = useState(null);
   const [createChatModal, setCreateChatModal] = useState(false);
+  const [userSearchModal, setUserSearchModal] = useState(false)
 
   const user = useSelector((state) => state.user.authUser);
   const chatType = useSelector((state) => state.selection.selection);
@@ -100,6 +104,7 @@ const Home = () => {
             )}
           </section>
 
+          {userSearchModal && <UserSearchModal />}
           {chats.map((chat) => {
             return (
               <Conversations

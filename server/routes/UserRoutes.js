@@ -6,5 +6,6 @@ const UserRouter=express.Router();
 UserRouter.post('/',addingUser);
 UserRouter.get('/:id',gettingUser);
 UserRouter.post('/login',logingUser);
+UserRouter.get('/org/:orgId')
 
 export default UserRouter
