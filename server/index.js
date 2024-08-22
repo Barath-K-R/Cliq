@@ -7,7 +7,7 @@ import connectDB from "./config/dbConfig.js";
 import chatRouter from "./routes/ChatRoute.js";
 import UserRouter from "./routes/UserRoutes.js";
 import messageRouter from "./routes/MessageRoutes.js";
-
+import orgRouter from "./routes/OrganizationRoutes.js";
 const app = express();
 
 
@@ -24,4 +24,5 @@ app.listen(5000,()=>{
 app.use('/chat',chatRouter);
 app.use('/message',messageRouter);
 app.use('/user',UserRouter);
+app.use('/org',orgRouter);
 

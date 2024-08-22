@@ -3,7 +3,7 @@ import mysql from 'mysql2';
 const mysqldb = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'Barath@1974',
+    password: '9659223637',
     database: 'cliq',
     port: 3306
 });

@@ -1,5 +1,4 @@
 import { legacy_createStore as createStore} from 'redux'
-import { composeWithDevTools } from 'redux-devtools-extension';
 import rootReducer from '../reducers/rootReducer';
 function saveToLocalStorage(store) {
     try {
@@ -21,7 +20,7 @@ function saveToLocalStorage(store) {
     }
   }
 const persistedState = loadFromLocalStorage();
-const store=createStore(rootReducer,persistedState,composeWithDevTools())
+const store=createStore(rootReducer,persistedState)
 store.subscribe(() => saveToLocalStorage(store.getState()));
 
 export default store
