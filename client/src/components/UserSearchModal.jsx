@@ -8,11 +8,16 @@ const UserSearchModal = ({
   selectedUsers,
   setselectedUsers,
   createChatSelection,
+  handleCreateChat,
 }) => {
   const [orgUsers, setOrgUsers] = useState(null);
   const [filteredUsers, setFilteredUsers] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [groupName, setgroupName] = useState("");
+
   const user = useSelector((state) => state.user.authUser);
+
+  //fetching all organization users
   useEffect(() => {
     const fetchOrgUsers = async () => {
       try {
@@ -26,6 +31,7 @@ const UserSearchModal = ({
     fetchOrgUsers();
   }, []);
 
+  //filtering user based on user selection
   useEffect(() => {
     const filterUser = () => {
       setFilteredUsers(
@@ -46,21 +52,44 @@ const UserSearchModal = ({
       //add users to selected list
       setselectedUsers((prev) => [...prev, user.id]);
     }
+
+    if (createChatSelection === "direct" && selectedUsers.length === 1)
+      handleCreateChat();
   };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
       <div className="absolute inset-0 bg-black bg-opacity-55 " />
-      <div className="relative bottom-4 flex flex-col w-3/6 h-[90%] bg-white rounded-lg shadow-lg ">
+      <div className="relative bottom-2 flex flex-col w-3/6 h-[94%] bg-white rounded-lg shadow-lg ">
+        {/* title */}
         <div className="flex justify-between items-center w-full h-10 p-6 bg-gray-100">
-          <span className="font-semibold text-xl">{createChatSelection==='direct'?'Send a direct message':'Select users for your group'}</span>
+          <span className="font-semibold text-xl">
+            {createChatSelection === "direct"
+              ? "Send a direct message"
+              : "Select users for your group"}
+          </span>
           <AiFillCloseCircle
             size={24}
             className="cursor-pointer"
-            onClick={() => setUserSearchModal(false)}
+            onClick={() => {
+              setUserSearchModal(false);
+              setselectedUsers([]);
+            }}
           />
         </div>
         <div className="flex flex-col items-center pt-6 w-full gap-6">
+          {/* group name  */}
+          {createChatSelection === "group" && (
+            <div className="w-5/6 h-10">
+              <input
+                type="text"
+                placeholder="Enter the Group Name"
+                className="w-full h-full border pl-4 border-gray-300 focus:border-blue-500 focus:outline-none rounded-md"
+                onChange={(e) => setgroupName(e.target.value)}
+              />
+            </div>
+          )}
+
           {/* search div */}
           <div className="flex items-center gap-2 border pl-2 w-5/6 h-10 border-b-gray-200">
             <AiOutlineSearch size={24} className="cursor-pointer" />
@@ -73,7 +102,9 @@ const UserSearchModal = ({
           </div>
           {/* users list */}
           <div
-            className="flex w-5/6 h-full flex-col gap-4 overflow-y-auto"
+            className={`flex w-5/6 ${
+              createChatSelection === "group" ? "h-3/6" : "h-5/6"
+            } flex-col gap-4 overflow-y-auto`}
             style={{ maxHeight: "350px" }}
           >
             {filteredUsers &&
@@ -102,9 +133,14 @@ const UserSearchModal = ({
               })}
           </div>
           {createChatSelection === "group" && (
-            <button className="w-24 h-8 bg-blue-500 hover:bg-opacity-55 rounded">
-              Create
-            </button>
+            <div className="flex justify-center w-full p-4 rounded-b-lg">
+              <button
+                className="w-24 h-10 bg-blue-500 hover:bg-opacity-75 rounded"
+                onClick={() => handleCreateChat(groupName)}
+              >
+                Create
+              </button>
+            </div>
           )}
         </div>
       </div>

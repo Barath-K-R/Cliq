@@ -1,9 +1,13 @@
-import React,{useState,useEffect}from "react";
+import React, { useState, useEffect } from "react";
 import { CiMap } from "react-icons/ci";
 import { CiReceipt } from "react-icons/ci";
 import { CiServer } from "react-icons/ci";
-const CreateChatModal = ({setCreateChatModalOpened,setUserSearchModal,createChatSelection,setcreateChatSelection}) => {
-    
+const CreateChatModal = ({
+  setCreateChatModalOpened,
+  setUserSearchModal,
+  setcreateChannelModal,
+  setcreateChatSelection,
+}) => {
   return (
     <div
       className="create-chat-modal flex flex-col w-56 h-22 absolute top-12 left-40 shadow-xl list-none bg-white"
@@ -14,7 +18,7 @@ const CreateChatModal = ({setCreateChatModalOpened,setUserSearchModal,createChat
         onClick={() => {
           setUserSearchModal(true);
           setCreateChatModalOpened(false);
-          setcreateChatSelection('direct')
+          setcreateChatSelection("direct");
         }}
       >
         <CiMap />
@@ -25,15 +29,19 @@ const CreateChatModal = ({setCreateChatModalOpened,setUserSearchModal,createChat
         onClick={() => {
           setUserSearchModal(true);
           setCreateChatModalOpened(false);
-          setcreateChatSelection('group')
+          setcreateChatSelection("group");
         }}
       >
         <CiReceipt />
         <span>Start a Group conversation</span>
       </section>
-      <section className="flex gap-2 pl-1 items-center cursor-pointer" onClick={()=>{
-        setcreateChatSelection('channel')
-      }}>
+      <section
+        className="flex gap-2 pl-1 items-center cursor-pointer"
+        onClick={() => {
+          setcreateChatSelection("channel");
+          setcreateChannelModal(true);
+        }}
+      >
         <CiServer />
         <span>Create a channel</span>
       </section>

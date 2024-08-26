@@ -4,6 +4,7 @@ import Conversations from "../components/Conversations.jsx";
 import ChatBox from "../components/ChatBox.jsx";
 import UserSearchModal from "../components/UserSearchModal.jsx";
 import CreateChatModal from "../components/CreateChatModal.jsx";
+import CreateChannelModal from "../components/CreateChannelModal.jsx";
 
 import { io } from "socket.io-client";
 import { useAuth } from "../context/AuthContext.js";
@@ -21,6 +22,7 @@ const Home = () => {
   const [receivedMessage, setReceivedMessage] = useState(null);
   const [createChatModalOpened, setCreateChatModalOpened] = useState(false);
   const [userSearchModal, setUserSearchModal] = useState(false);
+  const [createChannelModal, setcreateChannelModal] = useState(false);
   const [selectedUsers, setselectedUsers] = useState([]);
   const [createChatSelection, setcreateChatSelection] = useState("");
 
@@ -71,25 +73,27 @@ const Home = () => {
     });
   }, []);
 
-  //creating chat
-  useEffect(() => {
-    const handleCreateChat = async () => {
-      if (createChatSelection === "direct" && selectedUsers.length===1) {
-        const chatData = {
-          currentUserId: user.id,
-          userIds: selectedUsers,
-          chatType: createChatSelection,
-        };
-        const response = await createChat(chatData);
-        console.log(response.data.newChat)
-        setChats(prev=>[...prev,response.data.newChat])
-        setCurrentChat(response.data.newChat)
-        setUserSearchModal(false);
-        setselectedUsers([]);
-      }
-    };
-    handleCreateChat();
-  }, [selectedUsers]);
+  const handleCreateChat = async (groupName) => {
+    try {
+      console.log("Handle create chat" + " " + selectedUsers.length);
+      const chatData = {
+        currentUserId: user.id,
+        userIds: selectedUsers,
+        chatType: createChatSelection,
+        name: groupName,
+        description: "",
+      };
+
+      const response = await createChat(chatData);
+      console.log(response.data);
+      setChats((prev) => [...prev, response.data.newChat]);
+      setCurrentChat(response.data.newChat);
+      setUserSearchModal(false);
+      setselectedUsers([]);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <>
@@ -109,6 +113,7 @@ const Home = () => {
                 setUserSearchModal={setUserSearchModal}
                 createChatSelection={createChatSelection}
                 setcreateChatSelection={setcreateChatSelection}
+                setcreateChannelModal={setcreateChannelModal}
               />
             )}
           </section>
@@ -120,15 +125,24 @@ const Home = () => {
               setUserSearchModal={setUserSearchModal}
               setCurrentChat={setCurrentChat}
               createChatSelection={createChatSelection}
+              handleCreateChat={handleCreateChat}
             />
           )}
+
+          {createChannelModal && (
+            <CreateChannelModal
+              setcreateChannelModal={setcreateChannelModal}
+              setselectedUsers={setselectedUsers}
+            />
+          )}
+
           {chats.map((chat) => {
             return (
               <Conversations
                 chat={chat}
                 currentUserId={user.id}
                 setCurrentChat={setCurrentChat}
-                key={chat._id}
+                key={chat.id}
               />
             );
           })}

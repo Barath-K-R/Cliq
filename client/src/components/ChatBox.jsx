@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { getUser } from "../api/UserApi";
 import { getMessages, addMessage, retrieveMembers } from "../api/ChatApi";
-const ChatBox = ({ chat, currentUser,chatType, setSendMessage, receivedMessage }) => {
+const ChatBox = ({
+  chat,
+  currentUser,
+  chatType,
+  setSendMessage,
+  receivedMessage,
+}) => {
   const [isGroup, setIsGroup] = useState(false);
   const [groupMembers, setGroupMembers] = useState([]);
   const [messages, setMessages] = useState([]);
@@ -31,7 +37,7 @@ const ChatBox = ({ chat, currentUser,chatType, setSendMessage, receivedMessage }
     const fetchMessages = async () => {
       try {
         const { data } = await getMessages(chat?.chat_id);
-        console.log(data)
+        console.log(data);
         setMessages(data);
       } catch (error) {
         console.log(error);
@@ -43,15 +49,15 @@ const ChatBox = ({ chat, currentUser,chatType, setSendMessage, receivedMessage }
 
   const handleSend = async (e) => {
     e.preventDefault();
-    const userIds = groupMembers.filter(
-      (user) => user.user_id !== currentUser.id
-    ).map(user=>user.user_id);
+    const userIds = groupMembers
+      .filter((user) => user.user_id !== currentUser.id)
+      .map((user) => user.user_id);
     const message = {
-      username:currentUser.username,
+      username: currentUser.username,
       senderId: currentUser.id,
       message: newMessage,
       chatId: chat.chat_id,
-      chatType:chatType
+      chatType: chatType,
     };
 
     // send message to socket server
@@ -60,7 +66,7 @@ const ChatBox = ({ chat, currentUser,chatType, setSendMessage, receivedMessage }
     // send message to database
     try {
       const { data } = await addMessage(message);
-      console.log(data)
+      console.log(data);
       setMessages([...messages, data]);
       setNewMessage("");
     } catch {

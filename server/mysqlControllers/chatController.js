@@ -1,34 +1,8 @@
 import mysqldb from "../config/mysqlConfig.js";
 
-export const creatingChat = async (req, res) => {
-  const { chatType, name, description, userIds } = req.body;
-  if (!chatType || !["direct", "group", "channel"].includes(chatType)) {
-    return res.status(400).json({ error: "Invalid chat type" });
-  }
-  let groupName = "";
-  if (chatType === "group" || chatType === "channel") groupName = name;
-
-  let query = "insert into chats (chat_type,name,description) values (?,?,?)";
-
-  mysqldb.query(query, [chatType, groupName, description], (err, results) => {
-    if (err) throw err;
-    const chatId = results.insertId;
-
-    const values = userIds.map((userId) => [chatId, userId]);
-    mysqldb.query(
-      "INSERT INTO chat_members (chat_id, user_id) VALUES ?",
-      [values],
-      (err) => {
-        if (err) throw err;
-        res.status(200).json({ chatId });
-      }
-    );
-  });
-};
-
 export const createChat = async (req, res) => {
-  console.log(req.body)
-  const { currentUserId, userIds, chatType,name,description} = req.body;
+  console.log(req.body);
+  const { currentUserId, userIds, chatType, name, description } = req.body;
 
   const chatquery = `
       SELECT cm.chat_id, cm.user_id, c.chat_type, c.name, u.username 
@@ -43,7 +17,8 @@ export const createChat = async (req, res) => {
       AND cm.user_id = ?`;
   try {
     //if chat is direct
-    if (chatType ==="direct") {
+    if (chatType === "direct") {
+      console.log("DIRECT");
       const [results] = await mysqldb
         .promise()
         .query(chatquery, [currentUserId, chatType, userIds[0]]);
@@ -64,27 +39,47 @@ export const createChat = async (req, res) => {
             ],
           ]);
 
+        const [newChatResults] = await mysqldb
+          .promise()
+          .query(chatquery, [currentUserId, chatType, userIds[0]]);
 
-         const [newChatResults] =await mysqldb.promise().query(chatquery,[currentUserId, chatType, userIds[0]]);
-
-        res.send({ newChat:newChatResults[0], message: "New chat created and users added." });
+        res.send({
+          newChat: newChatResults[0],
+          message: "New chat created and users added.",
+        });
       } else {
         res.send(results);
       }
     }
     // if it is group
-    else if(chatType==='group'){
-       const [groupResult]=await mysqldb.query('insert into chats (chat_type,name,description) values (?,?,?)',[chatType,name,description]);
+    else if (chatType === "group") {
+      console.log("GROUP");
+      const [groupResult] = await mysqldb
+        .promise()
+        .query(
+          "insert into chats (chat_type,name,description) values (?,?,?)",
+          [chatType, name, description]
+        );
 
-       const groupId=groupResult.insertId;
-       const values = userIds.map((userId) => [groupId, userId]);
-       await mysqldb.query('insert into chat_members (chat_id,user_id)',[values]);
+      const groupId = groupResult.insertId;
+      const values = userIds.map((userId) => [groupId, userId]);
+      await mysqldb
+        .promise()
+        .query("insert into chat_members (chat_id,user_id) values ?", [values]);
 
-       res.send({groupId,message:"new group created and the members were added successfully"});
+      const [newChatResults] = await mysqldb
+        .promise()
+        .query(`select c.id as chat_id,c.name from chats c where c.id=?`, [
+          groupId,
+        ]);
+      console.log(newChatResults);
+      res.send({
+        newChat: newChatResults[0],
+        message: "New chat created and users were added successfully",
+      });
     }
     //if it is channel
-    else{
-        
+    else {
     }
   } catch (err) {
     console.error(err);
@@ -94,6 +89,10 @@ export const createChat = async (req, res) => {
   }
 };
 
+export const createChannel = async (req, res) => {
+  try {
+  } catch (error) {}
+};
 export const getCurrentUserChats = async (req, res) => {
   try {
     const type = req.query.type;
