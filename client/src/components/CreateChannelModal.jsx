@@ -9,7 +9,12 @@ const CreateChannelModal = ({ setcreateChannelModal, setselectedUsers }) => {
   const [orgUsers, setOrgUsers] = useState(null);
   const [filteredUsers, setFilteredUsers] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [visibilitySelection, setvisibilitySelection] = useState("");
   const [addParticpantModal, setaddParticpantModal] = useState(false);
+  const buttonStyles = {
+    backgroundColor: "bg-blue-400",
+    borderRadius: "rounded-3xl",
+  };
   //fetching all organization users
   useEffect(() => {
     const fetchOrgUsers = async () => {
@@ -113,11 +118,25 @@ const CreateChannelModal = ({ setcreateChannelModal, setselectedUsers }) => {
             )}
           </div>
           {/* open or closed */}
-          <div className="flex justify-between items-center w-full h-[6%]">
+          <div className="flex justify-start items-center w-full h-[6%]">
             <h2 className="w-2/6 pl-4">Visiblilty</h2>
-            <div className="section">
-              <button>Open</button>
-              <button>closed</button>
+            <div className="flex section justify-between items-center w-2/6 h-full rounded-3xl bg-gray-100 px-2 py-1">
+              <div
+                className={`flex justify-center items-center open w-3/6 h-full ${
+                  visibilitySelection === "open" && buttonStyles.backgroundColor
+                } rounded-3xl text-sm cursor-pointer`}
+                onClick={()=>setvisibilitySelection('open')}
+              >
+                Open to All
+              </div>
+              <div
+                className={`flex justify-center items-center closed w-3/6 h-full ${
+                  visibilitySelection === "close" && buttonStyles.backgroundColor
+                } rounded-3xl text-sm cursor-pointer`}
+                onClick={()=>setvisibilitySelection('close')}
+              >
+                Closed
+              </div>
             </div>
           </div>
           {/* channel description */}
