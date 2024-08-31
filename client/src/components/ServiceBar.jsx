@@ -17,7 +17,7 @@ const ServiceBar = () => {
         <BsChatRightQuoteFill size={24} />
         <span className="text-xs">Group</span>
       </div>
-      <div className="flex flex-col items-center cursor-pointer" onClick={()=>dispatch({type:'ADD_SELECTION',payload:'channels'})}>
+      <div className="flex flex-col items-center cursor-pointer" onClick={()=>dispatch({type:'ADD_SELECTION',payload:'channel'})}>
         <BsCollectionFill size={24}/>
         <span className="text-xs">Channels</span>
       </div>

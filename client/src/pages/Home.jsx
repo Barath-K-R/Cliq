@@ -7,7 +7,6 @@ import CreateChatModal from "../components/CreateChatModal.jsx";
 import CreateChannelModal from "../components/CreateChannelModal.jsx";
 
 import { io } from "socket.io-client";
-import { useAuth } from "../context/AuthContext.js";
 import { userChats, createChat } from "../api/ChatApi.js";
 import { useSelector } from "react-redux";
 import { AiOutlinePlus } from "react-icons/ai";
@@ -16,6 +15,15 @@ import "../styles/Home.css";
 
 const Home = () => {
   const [chats, setChats] = useState([]);
+  const [chatData, setchatData] = useState({
+        currentUserId:null,
+        userIds:[],
+        chatType:"",
+        name:"",
+        description: "",
+        visibility:"",
+        scope:""
+  })
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [currentChat, setCurrentChat] = useState(null);
   const [sendMessage, setSendMessage] = useState(null);
@@ -41,7 +49,7 @@ const Home = () => {
       }
     };
     getChats();
-  }, [chatType]);
+  }, [chatType,chatData]);
 
   // Connect to Socket.io
   useEffect(() => {
@@ -72,24 +80,36 @@ const Home = () => {
       setReceivedMessage(data);
     });
   }, []);
-
+  
+  //creating new chat
   const handleCreateChat = async (groupName) => {
     try {
-      console.log("Handle create chat" + " " + selectedUsers.length);
-      const chatData = {
+      console.log("Handle create chat" + " " + selectedUsers);
+      const data = {
         currentUserId: user.id,
         userIds: selectedUsers,
         chatType: createChatSelection,
-        name: groupName,
-        description: "",
+        name: chatData.name,
+        description: chatData.description,
+        visibility:chatData.visibility,
+        scope:chatData.scope
       };
 
-      const response = await createChat(chatData);
+      const response = await createChat(data);
       console.log(response.data);
       setChats((prev) => [...prev, response.data.newChat]);
       setCurrentChat(response.data.newChat);
       setUserSearchModal(false);
       setselectedUsers([]);
+      setchatData((prev) => {
+        return {
+          ...prev,
+          name: "",
+          scope: "",
+          visibility: "",
+          description: "",
+        };
+      });
     } catch (error) {
       console.log(error);
     }
@@ -126,13 +146,18 @@ const Home = () => {
               setCurrentChat={setCurrentChat}
               createChatSelection={createChatSelection}
               handleCreateChat={handleCreateChat}
+              setchatData={setchatData}
             />
           )}
 
           {createChannelModal && (
             <CreateChannelModal
               setcreateChannelModal={setcreateChannelModal}
+              selectedUsers={selectedUsers}
               setselectedUsers={setselectedUsers}
+              chatData={chatData}
+              setchatData={setchatData}
+              handleCreateChat={handleCreateChat}
             />
           )}
 

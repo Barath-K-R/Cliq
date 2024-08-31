@@ -2,7 +2,15 @@ import mysqldb from "../config/mysqlConfig.js";
 
 export const createChat = async (req, res) => {
   console.log(req.body);
-  const { currentUserId, userIds, chatType, name, description } = req.body;
+  const {
+    currentUserId,
+    userIds,
+    chatType,
+    name,
+    description,
+    visibility,
+    scope,
+  } = req.body;
 
   const chatquery = `
       SELECT cm.chat_id, cm.user_id, c.chat_type, c.name, u.username 
@@ -21,7 +29,7 @@ export const createChat = async (req, res) => {
       console.log("DIRECT");
       const [results] = await mysqldb
         .promise()
-        .query(chatquery, [currentUserId, chatType, userIds[0]]);
+        .query(chatquery, [currentUserId, chatType, userIds[0].id]);
 
       if (results.length === 0) {
         const [chatResult] = await mysqldb
@@ -35,13 +43,13 @@ export const createChat = async (req, res) => {
           .query("INSERT INTO chat_members (chat_id, user_id) VALUES ?", [
             [
               [chatId, currentUserId],
-              [chatId, userIds[0]],
+              [chatId, userIds[0].id],
             ],
           ]);
 
         const [newChatResults] = await mysqldb
           .promise()
-          .query(chatquery, [currentUserId, chatType, userIds[0]]);
+          .query(chatquery, [currentUserId, chatType, userIds[0].id]);
 
         res.send({
           newChat: newChatResults[0],
@@ -62,7 +70,8 @@ export const createChat = async (req, res) => {
         );
 
       const groupId = groupResult.insertId;
-      const values = userIds.map((userId) => [groupId, userId]);
+      const values = userIds.map((user) => [groupId, user.id]);
+      values.push([groupId,currentUserId]);
       await mysqldb
         .promise()
         .query("insert into chat_members (chat_id,user_id) values ?", [values]);
@@ -80,6 +89,33 @@ export const createChat = async (req, res) => {
     }
     //if it is channel
     else {
+      const [channelResult] = await mysqldb
+          .promise()
+          .query(
+            "INSERT INTO chats (chat_type,name,description,visibility,scope) VALUES (?,?,?,?,?)",
+            [chatType, name, description, visibility, scope]
+          );
+
+        const channelId = channelResult.insertId;
+        const values = userIds.map((user) => [channelId, user.id]);
+        values.push([channelId,currentUserId]);
+        await mysqldb
+          .promise()
+          .query("insert into chat_members (chat_id,user_id) values ?", [
+            values,
+          ]);
+
+        const [newChatResults] = await mysqldb
+          .promise()
+          .query(`select c.id as chat_id,c.name from chats c where c.id=?`, [
+            channelId,
+          ]);
+        console.log(newChatResults);
+        res.send({
+          newChat: newChatResults[0],
+          message: "New chat created and users were added successfully",
+        });
+      
     }
   } catch (err) {
     console.error(err);
@@ -89,10 +125,7 @@ export const createChat = async (req, res) => {
   }
 };
 
-export const createChannel = async (req, res) => {
-  try {
-  } catch (error) {}
-};
+
 export const getCurrentUserChats = async (req, res) => {
   try {
     const type = req.query.type;
