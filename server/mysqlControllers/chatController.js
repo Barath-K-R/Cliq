@@ -71,7 +71,7 @@ export const createChat = async (req, res) => {
 
       const groupId = groupResult.insertId;
       const values = userIds.map((user) => [groupId, user.id]);
-      values.push([groupId,currentUserId]);
+      values.push([groupId, currentUserId]);
       await mysqldb
         .promise()
         .query("insert into chat_members (chat_id,user_id) values ?", [values]);
@@ -90,32 +90,29 @@ export const createChat = async (req, res) => {
     //if it is channel
     else {
       const [channelResult] = await mysqldb
-          .promise()
-          .query(
-            "INSERT INTO chats (chat_type,name,description,visibility,scope) VALUES (?,?,?,?,?)",
-            [chatType, name, description, visibility, scope]
-          );
+        .promise()
+        .query(
+          "INSERT INTO chats (chat_type,name,description,visibility,scope) VALUES (?,?,?,?,?)",
+          [chatType, name, description, visibility, scope]
+        );
 
-        const channelId = channelResult.insertId;
-        const values = userIds.map((user) => [channelId, user.id]);
-        values.push([channelId,currentUserId]);
-        await mysqldb
-          .promise()
-          .query("insert into chat_members (chat_id,user_id) values ?", [
-            values,
-          ]);
+      const channelId = channelResult.insertId;
+      const values = userIds.map((user) => [channelId, user.id]);
+      values.push([channelId, currentUserId]);
+      await mysqldb
+        .promise()
+        .query("insert into chat_members (chat_id,user_id) values ?", [values]);
 
-        const [newChatResults] = await mysqldb
-          .promise()
-          .query(`select c.id as chat_id,c.name from chats c where c.id=?`, [
-            channelId,
-          ]);
-        console.log(newChatResults);
-        res.send({
-          newChat: newChatResults[0],
-          message: "New chat created and users were added successfully",
-        });
-      
+      const [newChatResults] = await mysqldb
+        .promise()
+        .query(`select c.id as chat_id,c.name from chats c where c.id=?`, [
+          channelId,
+        ]);
+      console.log(newChatResults);
+      res.send({
+        newChat: newChatResults[0],
+        message: "New chat created and users were added successfully",
+      });
     }
   } catch (err) {
     console.error(err);
@@ -124,7 +121,6 @@ export const createChat = async (req, res) => {
       .send({ error: "An error occurred while processing your request." });
   }
 };
-
 
 export const getCurrentUserChats = async (req, res) => {
   try {

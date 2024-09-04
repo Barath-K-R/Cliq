@@ -1,5 +1,4 @@
 import express from 'express';
-import { addMessage, getMessages } from '../controllers/MessageController.js';
 import { addingMessage ,getChatMessages,getGroupChatMessages} from '../mysqlControllers/messageController.js';
 const messageRouter = express.Router();
 

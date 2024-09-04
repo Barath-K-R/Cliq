@@ -1,5 +1,4 @@
 import mysqldb from "../config/mysqlConfig.js";
-import UserModel from "../models/UserModel.js";
 
 export const addingUser = async (req, res) => {
   const { username, email, password } = req.body;

@@ -1,30 +1,27 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/sequelizeConfig.js";
 
-const UserModel = sequelize.define(
-  "User",
+const OrganizationModel = sequelize.define(
+  "Organization",
   {
     id: {
       type: DataTypes.INTEGER,
-      primaryKey: true,
       autoIncrement: true,
+      primaryKey: true,
     },
-    username: {
+    name: {
       type: DataTypes.STRING(70),
       allowNull: false,
+      unique: true, // Ensures the name is unique
     },
-    password: {
-      type: DataTypes.STRING(70),
-      allowNull: false,
-    },
-    organization_id: {
+    admin: {
       type: DataTypes.INTEGER,
-      allowNull: true,
+      allowNull: true, // Ensures that the column can be null
       references: {
-        model: "organizations",
+        model: "users",
         key: "id",
       },
-      onDelete: "SET NULL",
+      onDelete: "SET NULL", // Sets the admin to null if the referenced user is deleted
     },
     created_at: {
       type: DataTypes.DATE,
@@ -38,17 +35,11 @@ const UserModel = sequelize.define(
     },
   },
   {
-    tableName: "users",
+    tableName: "organizations",
     timestamps: true,
     createdAt: "created_at",
     updatedAt: "updated_at",
-    indexes: [
-      {
-        unique: true,
-        fields: ["username"],
-      },
-    ],
   }
 );
 
-export default UserModel;
+export default OrganizationModel;

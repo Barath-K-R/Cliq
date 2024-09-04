@@ -1,21 +1,45 @@
-import mongoose from "mongoose";
-
-const MessageSchema = new mongoose.Schema(
+import sequelize from "../config/sequelizeConfig.js";
+import { DataTypes } from "sequelize";
+const MessageModel = sequelize.define(
+  "Message",
   {
-    chatId: {
-      type: String,
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
     },
-    senderId: {
-      type: String,
+    chat_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "chats",
+        key: "id",
+      },
+      onDelete: "CASCADE",
     },
-    text: {
-      type: String,
+    sender_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "users",
+        key: "id",
+      },
+      onDelete: "CASCADE",
+    },
+    message: {
+      type: DataTypes.TEXT,
+      allowNull: false,
     },
   },
   {
+    tableName: "messages",
     timestamps: true,
+    indexes: [
+      {
+        fields: ["chat_id", "sender_id"],
+      },
+    ],
   }
 );
 
-const MessageModel = mongoose.model("Message", MessageSchema);
-export default MessageModel
+export default MessageModel;
