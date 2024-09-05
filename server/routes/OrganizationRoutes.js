@@ -1,8 +1,15 @@
-import express from 'express';
-import { createOrganization,joinOrganization } from '../mysqlControllers/organizationController.js';
-const orgRouter=express.Router();
+import express from "express";
+import {
+  createOrganization,
+  joinOrganization,
+} from "../mysqlControllers/organizationController.js";
+import {
+  createOrganizationSequelize,
+  joinOrganizationSequelize,
+} from "../sequelizeControllers/organizationController.js";
+const orgRouter = express.Router();
 
-orgRouter.post('/',createOrganization);
-orgRouter.post('/join',joinOrganization);
+orgRouter.post("/", createOrganizationSequelize);
+orgRouter.post("/join", joinOrganizationSequelize);
 
-export default orgRouter
+export default orgRouter;

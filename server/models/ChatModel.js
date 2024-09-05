@@ -1,7 +1,7 @@
 // models/Chat.js
 import { DataTypes } from "sequelize";
 import sequelize from "../config/sequelizeConfig.js";
-
+import ChatMembersModel from "../models/ChatMembersModel.js";
 const ChatModel = sequelize.define(
   "Chat",
   {
@@ -57,5 +57,7 @@ const ChatModel = sequelize.define(
     timestamps: true,
   }
 );
+
+
 
 export default ChatModel;

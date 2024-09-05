@@ -12,12 +12,11 @@ const PermissionModel = sequelize.define(
     permission_name: {
       type: DataTypes.STRING(70),
       allowNull: false,
-      unique: true,
     },
   },
   {
     tableName: "permissions",
-    timestamps: false, 
+    timestamps: false,
   }
 );
 

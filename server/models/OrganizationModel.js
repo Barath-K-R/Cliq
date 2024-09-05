@@ -12,16 +12,15 @@ const OrganizationModel = sequelize.define(
     name: {
       type: DataTypes.STRING(70),
       allowNull: false,
-      unique: true, // Ensures the name is unique
     },
     admin: {
       type: DataTypes.INTEGER,
-      allowNull: true, // Ensures that the column can be null
+      allowNull: true, 
       references: {
         model: "users",
         key: "id",
       },
-      onDelete: "SET NULL", // Sets the admin to null if the referenced user is deleted
+      onDelete: "SET NULL", 
     },
     created_at: {
       type: DataTypes.DATE,

@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/sequelizeConfig.js";
-
+import ChatMembersModel from '../models/ChatMembersModel.js'
 const UserModel = sequelize.define(
   "User",
   {
@@ -50,5 +50,7 @@ const UserModel = sequelize.define(
     ],
   }
 );
+
+
 
 export default UserModel;

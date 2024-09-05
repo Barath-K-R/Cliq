@@ -1,8 +1,9 @@
 // models/ChatMember.js
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/sequelizeConfig.js';
-
-const ChatMemberModel = sequelize.define('ChatMember', {
+import UserModel from '../models/UserModel.js';
+import ChatModel from '../models/ChatModel.js'
+const ChatMembersModel = sequelize.define('ChatMember', {
   chat_id: {
     type: DataTypes.INTEGER,
     references: {
@@ -38,4 +39,6 @@ const ChatMemberModel = sequelize.define('ChatMember', {
   ]
 });
 
-export default ChatMemberModel;
+
+
+export default ChatMembersModel;

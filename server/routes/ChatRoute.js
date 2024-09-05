@@ -5,11 +5,12 @@ import {
   createGroupchat,
   getChatMembers,
 } from "../mysqlControllers/chatController.js";
+import {createChatSequelize,getCurrentUserChatsSequelize,getChatMembersSequelize} from '../sequelizeControllers/chatController.js'
 const chatRouter = express.Router();
 
-chatRouter.post("/", createChat);
+chatRouter.post("/", createChatSequelize);
 chatRouter.post("/groupchat", createGroupchat);
-chatRouter.get("/:userId", getCurrentUserChats);
-chatRouter.get("/:chatId/members", getChatMembers);
+chatRouter.get("/:userId", getCurrentUserChatsSequelize);
+chatRouter.get("/:chatId/members", getChatMembersSequelize);
 
 export default chatRouter;

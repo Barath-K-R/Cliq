@@ -1,10 +1,14 @@
-import express from 'express';
-import { addingMessage ,getChatMessages,getGroupChatMessages} from '../mysqlControllers/messageController.js';
+import express from "express";
+import {
+  addingMessage,
+  getChatMessages,
+  getGroupChatMessages,
+} from "../mysqlControllers/messageController.js";
+import {addingMessageSequelize,getChatMessagesSequelize} from '../sequelizeControllers/messageController.js'
 const messageRouter = express.Router();
 
-messageRouter.post('/', addingMessage);
+messageRouter.post("/", addingMessageSequelize);
+messageRouter.get("/:chatId", getChatMessagesSequelize);
+messageRouter.get("/:groupchatId", getGroupChatMessages);
 
-messageRouter.get('/:chatId', getChatMessages);
-messageRouter.get('/:groupchatId', getGroupChatMessages);
-
-export default messageRouter
+export default messageRouter;

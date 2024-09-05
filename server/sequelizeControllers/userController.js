@@ -1,6 +1,6 @@
 import UserModel from "../models/UserModel.js";
 
-export const addingUser = async (req, res) => {
+export const addingUserSequelize = async (req, res) => {
   const { username, email, password } = req.body;
 
   try {
@@ -22,10 +22,7 @@ export const addingUser = async (req, res) => {
   }
 };
 
-import bcrypt from "bcrypt";
-import UserModel from "../models/UserModel.js"; // Import your UserModel
-
-export const logingUser = async (req, res) => {
+export const logingUserSequelize = async (req, res) => {
   const { username, password } = req.body;
 
   try {
@@ -55,7 +52,7 @@ export const logingUser = async (req, res) => {
   }
 };
 
-export const gettingUser = async (req, res) => {
+export const gettingUserSequelize = async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -73,7 +70,7 @@ export const gettingUser = async (req, res) => {
     res.status(500).send("An error occurred while fetching the user.");
   }
 };
-export const getAllOrgUsers = async (req, res) => {
+export const getAllOrgUsersSequelize = async (req, res) => {
   const { orgId } = req.params;
 
   try {

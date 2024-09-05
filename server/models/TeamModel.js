@@ -10,7 +10,6 @@ const TeamModel = sequelize.define('Team', {
   name: {
     type: DataTypes.STRING(70),
     allowNull: false,
-    unique: true,
   },
   description: {
     type: DataTypes.TEXT,

@@ -4,16 +4,20 @@ import cors from "cors";
 import dotenv from "dotenv";
 import sequelize from "./config/sequelizeConfig.js";
 
-import UserModel from "./models/UserModel.js";
-import ChatModel from "./models/ChatModel.js";
-import OrganizationModel from "./models/OrganizationModel.js";
+
 import MessageModel from "./models/MessageModel.js";
-import ChatMemberModel from "./models/ChatMembersModel.js";
 import TeamModel from "./models/TeamModel.js";
 import TeamMemberModel from "./models/TeamMembersModel.js";
 import PermissionModel from "./models/PermissionModel.js";
 import RoleModel from "./models/RolesModel.js";
 import ChatPermissionModel from "./models/ChatPermissionModel.js";
+
+import {
+  UserModel,
+  ChatModel,
+  ChatMembersModel,
+  OrganizationModel,
+} from './models/Association.js'
 
 import chatRouter from "./routes/ChatRoute.js";
 import UserRouter from "./routes/UserRoutes.js";

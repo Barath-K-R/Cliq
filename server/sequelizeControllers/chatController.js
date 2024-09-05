@@ -1,9 +1,10 @@
 import ChatModel from "../models/ChatModel.js";
-import ChatMemberModel from "../models/ChatMemberModel.js";
+import ChatMembersModel from '../models/ChatMembersModel.js'
 import UserModel from "../models/UserModel.js";
 import { Op } from "sequelize";
+import sequelize from "../config/sequelizeConfig.js";
 
-export const createChat = async (req, res) => {
+export const createChatSequelize = async (req, res) => {
   const {
     currentUserId,
     userIds,
@@ -23,7 +24,7 @@ export const createChat = async (req, res) => {
         where: {
           chat_type: chatType,
           id: {
-            [Op.in]: Sequelize.literal(
+            [Op.in]: sequelize.literal(
               `(SELECT chat_id FROM chat_members WHERE user_id = ${currentUserId})`
             ),
           },
@@ -44,7 +45,7 @@ export const createChat = async (req, res) => {
         });
 
         // Add members to the chat
-        await ChatMemberModel.bulkCreate([
+        await ChatMembersModel.bulkCreate([
           { chat_id: newChat.id, user_id: currentUserId },
           { chat_id: newChat.id, user_id: userIds[0].id },
         ]);
@@ -84,7 +85,7 @@ export const createChat = async (req, res) => {
       }));
       groupMembers.push({ chat_id: newGroup.id, user_id: currentUserId });
 
-      await ChatMemberModel.bulkCreate(groupMembers);
+      await ChatMembersModel.bulkCreate(groupMembers);
 
       const newGroupWithMembers = await ChatModel.findOne({
         where: { id: newGroup.id },
@@ -112,7 +113,7 @@ export const createChat = async (req, res) => {
       }));
       channelMembers.push({ chat_id: newChannel.id, user_id: currentUserId });
 
-      await ChatMemberModel.bulkCreate(channelMembers);
+      await ChatMembersModel.bulkCreate(channelMembers);
 
       const newChannelWithMembers = await ChatModel.findOne({
         where: { id: newChannel.id },
@@ -132,7 +133,7 @@ export const createChat = async (req, res) => {
   }
 };
 
-export const getCurrentUserChats = async (req, res) => {
+export const getCurrentUserChatsSequelize = async (req, res) => {
   try {
     const type = req.query.type;
     const { userId } = req.params;
@@ -171,7 +172,7 @@ export const getCurrentUserChats = async (req, res) => {
         attributes: ["id", "name"],
         include: [
           {
-            model: ChatMemberModel,
+            model: ChatMembersModel,
             where: { user_id: userId },
           },
         ],
@@ -183,5 +184,27 @@ export const getCurrentUserChats = async (req, res) => {
   } catch (error) {
     console.error("Error fetching user chats:", error);
     res.status(500).send({ error: "Internal Server Error" });
+  }
+};
+
+export const getChatMembersSequelize = async (req, res) => {
+  const { chatId } = req.params;
+
+  try {
+    const chatMembers = await ChatMembersModel.findAll({
+      where: { chat_id: chatId },
+      include: [
+        {
+          model: User,
+          attributes: ["id", "username", "email"],
+        },
+      ],
+      attributes: ["chat_id", "user_id"],
+    });
+
+    res.send(chatMembers);
+  } catch (err) {
+    console.error("Error fetching chat members:", err);
+    res.status(500).send("Couldn't retrieve the members.");
   }
 };
