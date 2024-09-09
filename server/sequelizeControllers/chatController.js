@@ -24,9 +24,11 @@ export const createChatSequelize = async (req, res) => {
         where: {
           chat_type: chatType,
           id: {
-            [Op.in]: sequelize.literal(
-              `(SELECT chat_id FROM chat_members WHERE user_id = ${currentUserId})`
-            ),
+            [Op.in]: sequelize.literal(`(
+              SELECT chat_id 
+              FROM chat_members 
+              WHERE user_id = ${sequelize.escape(currentUserId)}
+            )`),
           },
         },
         include: [
@@ -38,6 +40,7 @@ export const createChatSequelize = async (req, res) => {
         ],
       });
 
+      console.log(existingChat)
       if (!existingChat) {
         // Create new chat
         const newChat = await ChatModel.create({
@@ -195,8 +198,8 @@ export const getChatMembersSequelize = async (req, res) => {
       where: { chat_id: chatId },
       include: [
         {
-          model: User,
-          attributes: ["id", "username", "email"],
+          model: UserModel,
+          attributes: ["id", "username"],
         },
       ],
       attributes: ["chat_id", "user_id"],

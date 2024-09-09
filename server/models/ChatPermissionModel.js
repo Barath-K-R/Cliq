@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/sequelizeConfig.js";
-
+import PermissionModel from "../models/PermissionModel.js";
+import ChatModel from "../models/ChatModel.js";
 const ChatPermissionModel = sequelize.define(
   "ChatPermission",
   {
@@ -8,10 +9,10 @@ const ChatPermissionModel = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "chats",
+        model: ChatModel,
         key: "id",
       },
-      onDelete: "CASCADE", 
+      onDelete: "CASCADE",
     },
     role: {
       type: DataTypes.INTEGER,
@@ -21,19 +22,19 @@ const ChatPermissionModel = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "permissions", 
-        key: "id", 
+        model: PermissionModel,
+        key: "id",
       },
-      onDelete: "CASCADE", 
+      onDelete: "CASCADE",
     },
   },
   {
     tableName: "chat_permissions",
-    timestamps: false, 
+    timestamps: false,
     indexes: [
       {
         unique: true,
-        fields: ["chat_id", "permission_id"], 
+        fields: ["chat_id", "permission_id"],
       },
     ],
   }

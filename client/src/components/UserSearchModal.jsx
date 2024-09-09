@@ -30,6 +30,7 @@ const UserSearchModal = ({
     const fetchOrgUsers = async () => {
       try {
         const response = await getAllOrgUser(user.organization_id);
+        console.log(response.data)
         setOrgUsers(response.data);
         setFilteredUsers(response.data);
       } catch (error) {

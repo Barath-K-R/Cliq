@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/sequelizeConfig.js";
-import ChatMembersModel from '../models/ChatMembersModel.js'
+
 const UserModel = sequelize.define(
   "User",
   {
@@ -21,7 +21,7 @@ const UserModel = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
-        model: "organizations",
+        model: "Organizations", // Reference by model name
         key: "id",
       },
       onDelete: "SET NULL",
@@ -50,7 +50,5 @@ const UserModel = sequelize.define(
     ],
   }
 );
-
-
 
 export default UserModel;
