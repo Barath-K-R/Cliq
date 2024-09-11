@@ -16,14 +16,14 @@ import "../styles/Home.css";
 const Home = () => {
   const [chats, setChats] = useState([]);
   const [chatData, setchatData] = useState({
-        currentUserId:null,
-        userIds:[],
-        chatType:"",
-        name:"",
-        description: "",
-        visibility:"",
-        scope:""
-  })
+    currentUserId: null,
+    userIds: [],
+    chatType: "",
+    name: "",
+    description: "",
+    visibility: "",
+    scope: "",
+  });
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [currentChat, setCurrentChat] = useState(null);
   const [sendMessage, setSendMessage] = useState(null);
@@ -43,13 +43,14 @@ const Home = () => {
     const getChats = async () => {
       try {
         const response = await userChats(user.id, chatType);
+        console.log(response);
         setChats(response.data);
       } catch (error) {
         console.log(error);
       }
     };
     getChats();
-  }, [chatType,chatData]);
+  }, [chatType, chatData]);
 
   // Connect to Socket.io
   useEffect(() => {
@@ -80,7 +81,7 @@ const Home = () => {
       setReceivedMessage(data);
     });
   }, []);
-  
+
   //creating new chat
   const handleCreateChat = async (groupName) => {
     try {
@@ -91,8 +92,8 @@ const Home = () => {
         chatType: createChatSelection,
         name: chatData.name,
         description: chatData.description,
-        visibility:chatData.visibility,
-        scope:chatData.scope
+        visibility: chatData.visibility,
+        scope: chatData.scope,
       };
 
       const response = await createChat(data);
@@ -161,13 +162,13 @@ const Home = () => {
             />
           )}
 
-          {chats.map((chat) => {
+          {chats?.map((chat) => {
             return (
               <Conversations
-                chat={chat}
-                currentUserId={user.id}
-                setCurrentChat={setCurrentChat}
                 key={chat.id}
+                chat={chat}
+                onlineUsers={onlineUsers}
+                setCurrentChat={setCurrentChat}
               />
             );
           })}

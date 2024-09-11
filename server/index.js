@@ -43,7 +43,7 @@ app.use(cors());
     );
 
     // Sync models
-    await sequelize.sync({ alter: true }); // You can use { force: true } to drop and recreate tables, but be cautious with this in production.
+    await sequelize.sync({ alter: true }); 
     console.log("All models were synchronized successfully.");
 
     // Start the server

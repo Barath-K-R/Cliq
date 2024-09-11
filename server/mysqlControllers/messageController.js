@@ -2,6 +2,7 @@ import mysqldb from "../config/mysqlConfig.js";
 
 export const addingMessage = async (req, res) => {
   console.log('adding mesage')
+  console.log(req.body)
   const { chatId,senderId, message } = req.body;
   let query='insert into messages (chat_id,sender_id,message) values (?,?,?)';
 

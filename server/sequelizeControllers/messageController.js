@@ -2,6 +2,7 @@ import MessageModel from '../models/MessageModel.js'
 import UserModel from '../models/UserModel.js'
 export const addingMessageSequelize = async (req, res) => {
     console.log("Adding message");
+    console.log(req.body)
     const { chatId, senderId, message } = req.body;
   
     try {
@@ -31,7 +32,6 @@ export const addingMessageSequelize = async (req, res) => {
         include: [
           {
             model: UserModel, 
-            as: "sender", 
             attributes: ["username"], 
           },
         ],

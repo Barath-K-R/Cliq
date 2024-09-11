@@ -85,7 +85,7 @@ const ChatBox = ({
   return (
     <div className="flex flex-col h-full w-full bg-slate-100">
       <div className="flex-10 flex items-center h-12 border border-solid border-gray-500 shadow-2xl bg-white p-4">
-        <h1>{chat?.name ? chat.name : chat?.username}</h1>
+        <h1>{chat?.Chat.name ? chat.Chat.name : chat?.User.username}</h1>
       </div>
       <div className="flex-1 flex flex-col gap-4 bg-white p-4">
         {messages.map((message, index) => {

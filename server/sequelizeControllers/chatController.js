@@ -1,5 +1,5 @@
 import ChatModel from "../models/ChatModel.js";
-import ChatMembersModel from '../models/ChatMembersModel.js'
+import ChatMembersModel from "../models/ChatMembersModel.js";
 import UserModel from "../models/UserModel.js";
 import { Op } from "sequelize";
 import sequelize from "../config/sequelizeConfig.js";
@@ -40,7 +40,7 @@ export const createChatSequelize = async (req, res) => {
         ],
       });
 
-      console.log(existingChat)
+      console.log(existingChat);
       if (!existingChat) {
         // Create new chat
         const newChat = await ChatModel.create({
@@ -50,7 +50,7 @@ export const createChatSequelize = async (req, res) => {
         // Add members to the chat
         await ChatMembersModel.bulkCreate([
           { chat_id: newChat.id, user_id: currentUserId },
-          { chat_id: newChat.id, user_id: userIds[0].id },
+          { chat_id: newChat.id, user_id: userIds[0] },
         ]);
 
         const newChatWithMembers = await ChatModel.findOne({
@@ -112,7 +112,7 @@ export const createChatSequelize = async (req, res) => {
       // Add members to the chat
       const channelMembers = userIds.map((user) => ({
         chat_id: newChannel.id,
-        user_id: user.id,
+        user_id: user,
       }));
       channelMembers.push({ chat_id: newChannel.id, user_id: currentUserId });
 
@@ -137,10 +137,12 @@ export const createChatSequelize = async (req, res) => {
 };
 
 export const getCurrentUserChatsSequelize = async (req, res) => {
+  console.log('getting current chats')
   try {
     const type = req.query.type;
     const { userId } = req.params;
-
+    console.log(type+' '+userId)
+    console.log(type);
     if (!type || !userId) {
       return res.status(400).send({ error: "Missing required parameters" });
     }
@@ -149,37 +151,48 @@ export const getCurrentUserChatsSequelize = async (req, res) => {
     if (type === "direct") {
       console.log("Fetching direct chats");
 
-      chats = await ChatModel.findAll({
-        attributes: ["id", "name", "chat_type"],
+      chats =await ChatMembersModel.findAll({
+        attributes: ["chat_id"],
+        where: {
+          chat_id: {
+            [Op.in]: sequelize.literal(`(
+              SELECT chat_id 
+              FROM chat_members 
+              WHERE user_id = ${userId}
+            )`),
+          },
+          user_id: {
+            [Op.ne]: userId,
+          },
+        },
         include: [
           {
             model: UserModel,
             attributes: ["id", "username"],
-            through: { attributes: [] },
-            where: { id: { [Op.ne]: userId } },
+          },
+          {
+            model: ChatModel,
+            where: {
+              chat_type: type,
+            },
+            attributes: ["id", "name", "chat_type"],
+          },
+        ],
+      });
+    }
+    else{
+      chats= await ChatMembersModel.findAll({
+        attributes: ['chat_id'],
+        include: [
+          {
+            model: ChatModel,
+            attributes: ['name'],
+            where: { chat_type: type }, 
           },
         ],
         where: {
-          id: {
-            [Op.in]: sequelize.literal(
-              `(SELECT chat_id FROM chat_members WHERE user_id = ${userId})`
-            ),
-          },
-          chat_type: type,
+          user_id: userId, // Filter by user ID
         },
-      });
-    } else {
-      console.log("Fetching groups");
-
-      chats = await ChatModel.findAll({
-        attributes: ["id", "name"],
-        include: [
-          {
-            model: ChatMembersModel,
-            where: { user_id: userId },
-          },
-        ],
-        where: { chat_type: type },
       });
     }
 
@@ -201,8 +214,12 @@ export const getChatMembersSequelize = async (req, res) => {
           model: UserModel,
           attributes: ["id", "username"],
         },
+        {
+          model: ChatModel,
+          attributes: ["id", "name"],
+        },
       ],
-      attributes: ["chat_id", "user_id"],
+      attributes: ["chat_id", "user_id", "role", "joined_at"],
     });
 
     res.send(chatMembers);
