@@ -1,5 +1,6 @@
 import sequelize from "../config/sequelizeConfig.js";
 import { DataTypes } from "sequelize";
+
 const MessageModel = sequelize.define(
   "Message",
   {
@@ -16,6 +17,15 @@ const MessageModel = sequelize.define(
         key: "id",
       },
       onDelete: "CASCADE",
+    },
+    thread_id:{
+      type:DataTypes.INTEGER,
+      allowNull:true,
+      references:{
+        model:"threads",
+        key:"id"
+      },
+      onDelete:"SET NULL"
     },
     sender_id: {
       type: DataTypes.INTEGER,

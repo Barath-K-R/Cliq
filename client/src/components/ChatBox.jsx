@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getUser } from "../api/UserApi";
+import { CiUser } from "react-icons/ci";
 import { getMessages, addMessage, retrieveMembers } from "../api/ChatApi";
 const ChatBox = ({
   chat,
@@ -9,7 +10,7 @@ const ChatBox = ({
   receivedMessage,
 }) => {
   const [isGroup, setIsGroup] = useState(false);
-  const [groupMembers, setGroupMembers] = useState([]);
+  const [chatMembers, setchatMembers] = useState([]);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const handleChange = (e) => {
@@ -27,7 +28,7 @@ const ChatBox = ({
     const getChatMembers = async () => {
       const response = await retrieveMembers(chat?.chat_id);
 
-      setGroupMembers(response.data);
+      setchatMembers(response.data);
     };
     getChatMembers();
   }, [chat]);
@@ -49,7 +50,7 @@ const ChatBox = ({
 
   const handleSend = async (e) => {
     e.preventDefault();
-    const userIds = groupMembers
+    const userIds = chatMembers
       .filter((user) => user.user_id !== currentUser.id)
       .map((user) => user.user_id);
     const message = {
@@ -84,8 +85,12 @@ const ChatBox = ({
 
   return (
     <div className="flex flex-col h-full w-full bg-slate-100">
-      <div className="flex-10 flex items-center h-12 border border-solid border-gray-500 shadow-2xl bg-white p-4">
-        <h1>{chat?.Chat.name ? chat.Chat.name : chat?.User.username}</h1>
+      <div className="flex items-center h-12 border border-solid border-gray-500 shadow-2xl bg-white p-4 gap-2">
+        <div className="w-1/6 border border-gray-100 shadow-sm cursor-pointer">
+          <h1 className="font-semibold text-xl ">{chat?.Chat.name ? chat.Chat.name : chat?.User.username}</h1>
+        </div>
+        <div className="flex justify-center items-center cursor-pointer"><CiUser size={22} />
+        <span>{chatMembers.length}</span></div>
       </div>
       <div className="flex-1 flex flex-col gap-4 bg-white p-4">
         {messages.map((message, index) => {

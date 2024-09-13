@@ -19,7 +19,7 @@ const Home = () => {
     currentUserId: null,
     userIds: [],
     chatType: "",
-    name: "",
+    name: "", 
     description: "",
     visibility: "",
     scope: "",
@@ -33,7 +33,7 @@ const Home = () => {
   const [createChannelModal, setcreateChannelModal] = useState(false);
   const [selectedUsers, setselectedUsers] = useState([]);
   const [createChatSelection, setcreateChatSelection] = useState("");
-
+  
   const user = useSelector((state) => state.user.authUser);
   const chatType = useSelector((state) => state.selection.selection);
   const socket = useRef();

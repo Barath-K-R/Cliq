@@ -8,7 +8,7 @@ import PermissionModel from "../models/PermissionModel.js";
 import ChatPermissionModel from "../models/ChatPermissionModel.js";
 import RolesModel from "../models/RolesModel.js";
 import OrganizationModel from "../models/OrganizationModel.js";
-
+import ThreadModel from "../models/ThreadModel.js";
 //usermodel relatioships
 UserModel.belongsTo(OrganizationModel, {
   foreignKey: "organization_id",
@@ -45,9 +45,13 @@ ChatModel.hasMany(ChatPermissionModel, {
   foreignKey: "chat_id",
 });
 
-ChatModel.hasMany(ChatMembersModel,{
-   foreignKey:"chat_id",
-})
+ChatModel.hasMany(ChatMembersModel, {
+  foreignKey: "chat_id",
+});
+
+ChatModel.hasMany(ThreadModel, {
+  foreignKey: "chatId",
+});
 
 //chatmembersmodel associations
 ChatMembersModel.belongsTo(RolesModel, {
@@ -102,4 +106,9 @@ ChatPermissionModel.belongsTo(ChatModel, {
 //rolemodel associations
 RolesModel.hasMany(ChatMembersModel, {
   foreignKey: "role_id",
+});
+
+//ThreadModel associations
+ThreadModel.belongsTo(ChatModel, {
+  foreignKey: "chatId",
 });

@@ -186,7 +186,7 @@ export const getCurrentUserChatsSequelize = async (req, res) => {
         include: [
           {
             model: ChatModel,
-            attributes: ['name'],
+            attributes: ['name','description','visibility','scope'],
             where: { chat_type: type }, 
           },
         ],
