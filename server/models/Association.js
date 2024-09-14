@@ -1,14 +1,15 @@
-import UserModel from "../models/UserModel.js";
-import ChatModel from "../models/ChatModel.js";
-import ChatMembersModel from "../models/ChatMembersModel.js";
-import MessageModel from "../models/MessageModel.js";
-import TeamModel from "../models/TeamModel.js";
-import TeamMembersModel from "../models/TeamMembersModel.js";
-import PermissionModel from "../models/PermissionModel.js";
-import ChatPermissionModel from "../models/ChatPermissionModel.js";
-import RolesModel from "../models/RolesModel.js";
-import OrganizationModel from "../models/OrganizationModel.js";
-import ThreadModel from "../models/ThreadModel.js";
+import UserModel from "./UserModel.js";
+import ChatModel from "./ChatModel.js";
+import ChatMembersModel from "./ChatMembersModel.js";
+import MessageModel from "./MessageModel.js";
+import TeamModel from "./TeamModel.js";
+import TeamMembersModel from "./TeamMembersModel.js";
+import PermissionModel from "./PermissionModel.js";
+import ChatPermissionModel from "./ChatPermissionModel.js";
+import RolesModel from "./RolesModel.js";
+import OrganizationModel from "./OrganizationModel.js";
+import ThreadModel from "./ThreadModel.js";
+import ReadRecieptModel from "./ReadReceiptModel.js";
 //usermodel relatioships
 UserModel.belongsTo(OrganizationModel, {
   foreignKey: "organization_id",
@@ -28,6 +29,10 @@ UserModel.belongsToMany(TeamModel, {
 
 UserModel.hasMany(MessageModel, {
   foreignKey: "sender_id",
+});
+
+UserModel.hasMany(ReadRecieptModel, {
+   foreignKey: "user_id"
 });
 
 //chatmodel relationships
@@ -83,6 +88,9 @@ MessageModel.belongsTo(UserModel, {
   foreignKey: "sender_id",
 });
 
+MessageModel.hasMany(ReadRecieptModel, {
+  foreignKey: "message_id" 
+});
 //organizationmodel relatioships
 OrganizationModel.hasMany(UserModel, {
   foreignKey: "organization_id",
@@ -111,4 +119,13 @@ RolesModel.hasMany(ChatMembersModel, {
 //ThreadModel associations
 ThreadModel.belongsTo(ChatModel, {
   foreignKey: "chatId",
+});
+
+//ReadReciept Model
+ReadRecieptModel.belongsTo(UserModel, {
+  foreignKey: "user_id",
+});
+
+ReadRecieptModel.belongsTo(MessageModel, {
+  foreignKey: "id",
 });

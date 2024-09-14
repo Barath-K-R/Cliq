@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getUser } from "../api/UserApi";
 import { CiUser } from "react-icons/ci";
-import { getMessages, addMessage, retrieveMembers } from "../api/ChatApi";
+import { getMessages, addMessage, retrieveMembers,addReadReciept} from "../api/ChatApi";
 const ChatBox = ({
   chat,
   currentUser,
@@ -17,6 +17,8 @@ const ChatBox = ({
     setNewMessage(e.target.value);
   };
 
+  //separating seen and unseen messages
+use
   //checking chat is group or direct
   useEffect(() => {
     if (chat?.name) setIsGroup(true);
@@ -38,7 +40,6 @@ const ChatBox = ({
     const fetchMessages = async () => {
       try {
         const { data } = await getMessages(chat?.chat_id);
-        console.log(data);
         setMessages(data);
       } catch (error) {
         console.log(error);
@@ -48,6 +49,7 @@ const ChatBox = ({
     if (chat !== null) fetchMessages();
   }, [chat]);
 
+  //handling sent messages
   const handleSend = async (e) => {
     e.preventDefault();
     const userIds = chatMembers
@@ -67,6 +69,8 @@ const ChatBox = ({
     // send message to database
     try {
       const { data } = await addMessage(message);
+      
+      const readRecieptResponse=await addReadReciept({message_id:data.id,user_id:currentUser.id})
       console.log(data);
       setMessages([...messages, data]);
       setNewMessage("");
@@ -87,10 +91,14 @@ const ChatBox = ({
     <div className="flex flex-col h-full w-full bg-slate-100">
       <div className="flex items-center h-12 border border-solid border-gray-500 shadow-2xl bg-white p-4 gap-2">
         <div className="w-1/6 border border-gray-100 shadow-sm cursor-pointer">
-          <h1 className="font-semibold text-xl ">{chat?.Chat.name ? chat.Chat.name : chat?.User.username}</h1>
+          <h1 className="font-semibold text-xl ">
+            {chat?.Chat.name ? chat.Chat.name : chat?.User.username}
+          </h1>
         </div>
-        <div className="flex justify-center items-center cursor-pointer"><CiUser size={22} />
-        <span>{chatMembers.length}</span></div>
+        <div className="flex justify-center items-center cursor-pointer">
+          <CiUser size={22} />
+          <span>{chatMembers.length}</span>
+        </div>
       </div>
       <div className="flex-1 flex flex-col gap-4 bg-white p-4">
         {messages.map((message, index) => {

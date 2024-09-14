@@ -43,7 +43,6 @@ const Home = () => {
     const getChats = async () => {
       try {
         const response = await userChats(user.id, chatType);
-        console.log(response);
         setChats(response.data);
       } catch (error) {
         console.log(error);
@@ -68,7 +67,6 @@ const Home = () => {
   // Send Message to socket server
   useEffect(() => {
     if (sendMessage !== null) {
-      console.log("emitting");
       socket.current.emit("send-message", sendMessage);
     }
   }, [sendMessage]);
@@ -76,8 +74,6 @@ const Home = () => {
   // Get the message from socket server
   useEffect(() => {
     socket.current.on("recieve-message", (data) => {
-      console.log("recieved message");
-      console.log(data);
       setReceivedMessage(data);
     });
   }, []);
