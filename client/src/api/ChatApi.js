@@ -9,3 +9,4 @@ export const getMessages=(id)=>chatApi.get(`/message/${id}`);
 export const addMessage=(message)=>chatApi.post('/message',message);
 export const checkUserChat=({currentUserId,secondUserId})=>chatApi.post('/chat',{currentUserId,secondUserId});
 export const addReadReciept=(reciept)=>chatApi.post('/message/readreciepts',reciept)
+export const updateReadReciepts=(readReceipt)=>chatApi.post('/message/readreciepts/update',readReceipt)

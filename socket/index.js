@@ -31,8 +31,6 @@ const io = new Server(8800, {
   
     // send message to a specific user
     socket.on("send-message", (data) => {
-      console.log('ACTIVE USERS')
-      console.log(activeUsers)
       console.log(data)
       const {userIds}=data
       console.log(userIds)

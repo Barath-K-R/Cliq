@@ -1,21 +1,22 @@
 import MessageModel from "../models/MessageModel.js";
 import UserModel from "../models/UserModel.js";
 import ReadRecieptModel from "../models/ReadReceiptModel.js";
+import { Op } from "sequelize";
 export const addingMessageSequelize = async (req, res) => {
   console.log("Adding message");
   console.log(req.body);
-  const { chatId, senderId, message } = req.body;
+  const { chatId, sender_id, message } = req.body;
 
   try {
     const newMessage = await MessageModel.create({
       chat_id: chatId,
-      sender_id: senderId,
+      sender_id: sender_id,
       message: message,
     });
     const insertedMessage = await MessageModel.findOne({
       where: { id: newMessage.id },
+      attributes: ["id", "chat_id", "thread_id", "sender_id", "message"],
     });
-
     res.send(insertedMessage);
   } catch (err) {
     console.error("Error adding message:", err);
@@ -50,11 +51,42 @@ export const getChatMessagesSequelize = async (req, res) => {
 };
 
 export const addReadReciept = async (req, res) => {
-  console.log(req.body);
+  const { message_id, userIds,date} = req.body;
+
   try {
-    const newReadReciept = await ReadRecieptModel.create(req.body);
-    res.send(newReadReciept)
+    const readReceipts = userIds.map((userId) => ({
+      message_id,
+      user_id: userId,
+      seen_at:date
+    }));
+    const newReadReciepts = await ReadRecieptModel.bulkCreate(readReceipts);
+    res.send(newReadReciepts);
   } catch (error) {
-    console.log(error)
+    console.log(error);
+  }
+};
+
+export const updateReadReciepts = async (req, res) => {
+  const { messageIds, userId, date } = req.body;
+
+  try {
+    const updatedReadReciept = await ReadRecieptModel.update(
+      { seen_at: date },
+      {
+        where: {
+          message_id: {
+            [Op.in]: messageIds,
+          },
+          user_id: userId,
+        },
+        
+      }
+
+    );
+
+    res.status(200).json(updatedReadReciept);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json("Failed to update read receipts");
   }
 };

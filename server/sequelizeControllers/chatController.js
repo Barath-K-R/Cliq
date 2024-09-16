@@ -213,13 +213,9 @@ export const getChatMembersSequelize = async (req, res) => {
         {
           model: UserModel,
           attributes: ["id", "username"],
-        },
-        {
-          model: ChatModel,
-          attributes: ["id", "name"],
-        },
+        }
       ],
-      attributes: ["chat_id", "user_id", "role", "joined_at"],
+      attributes: [ "user_id", "role", "joined_at"],
     });
 
     res.send(chatMembers);

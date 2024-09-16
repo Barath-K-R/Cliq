@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { getUser } from "../api/UserApi";
 import { CiUser } from "react-icons/ci";
-import { getMessages, addMessage, retrieveMembers,addReadReciept} from "../api/ChatApi";
+import debounce from 'lodash/debounce';
+import {
+  getMessages,
+  addMessage,
+  retrieveMembers,
+  addReadReciept,
+  updateReadReciepts,
+} from "../api/ChatApi";
 const ChatBox = ({
   chat,
   currentUser,
@@ -18,7 +25,35 @@ const ChatBox = ({
   };
 
   //separating seen and unseen messages
-use
+  useEffect(() => {
+    const updateReadReciepts = async () => {
+      console.log('Updating read receipts...');
+      console.log(messages)
+      try {
+        const unseenMessages = messages
+          .filter((message) => message?.ReadReciepts[0]?.seen_at === null)
+          .map((message) => message.id); 
+  
+        console.log('Unseen messages:', unseenMessages);
+  
+        if (unseenMessages.length > 0) {
+          const updatedReadRecieptsResponse = await updateReadReciepts({
+            messageIds: unseenMessages,
+            userId: currentUser.id,
+            date: Date.now(),
+          });
+          console.log(updatedReadRecieptsResponse);
+        }
+      } catch (error) {
+        console.error('Error updating read receipts:', error);
+      }
+    };
+    const debounceUpdate = debounce(updateReadReciepts, 300);
+    debounceUpdate();
+  }, [JSON.stringify(chat), currentUser.id]); 
+  
+  
+
   //checking chat is group or direct
   useEffect(() => {
     if (chat?.name) setIsGroup(true);
@@ -29,7 +64,6 @@ use
   useEffect(() => {
     const getChatMembers = async () => {
       const response = await retrieveMembers(chat?.chat_id);
-
       setchatMembers(response.data);
     };
     getChatMembers();
@@ -55,27 +89,31 @@ use
     const userIds = chatMembers
       .filter((user) => user.user_id !== currentUser.id)
       .map((user) => user.user_id);
-    const message = {
+    const newMessageData = {
       username: currentUser.username,
-      senderId: currentUser.id,
+      sender_id: currentUser.id,
       message: newMessage,
       chatId: chat.chat_id,
       chatType: chatType,
     };
 
     // send message to socket server
-    setSendMessage({ ...message, userIds });
-
+    setSendMessage({ ...newMessageData, userIds });
+    setMessages((prev) => [...prev, newMessageData]);
     // send message to database
     try {
-      const { data } = await addMessage(message);
+      const newMessageResponse= await addMessage(newMessageData);
+      console.log(newMessageResponse)
+      const readRecieptResponse = await addReadReciept({
+        message_id: newMessageResponse.data.id,
+        userIds: userIds,
+        date:null
+      });
+      console.log(readRecieptResponse)
       
-      const readRecieptResponse=await addReadReciept({message_id:data.id,user_id:currentUser.id})
-      console.log(data);
-      setMessages([...messages, data]);
       setNewMessage("");
-    } catch {
-      console.log("error");
+    } catch(error){
+      console.log(error);
     }
   };
 
@@ -83,7 +121,7 @@ use
   useEffect(() => {
     console.log("Message Arrived: ", receivedMessage);
     if (receivedMessage !== null && receivedMessage.chatId === chat?.chat_id) {
-      setMessages([...messages, receivedMessage]);
+      setMessages((prev) => [...prev, receivedMessage]);
     }
   }, [receivedMessage]);
 
