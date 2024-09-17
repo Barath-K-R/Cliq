@@ -24,7 +24,7 @@ const Conversations = ({ chat, setCurrentChat, onlineUsers }) => {
           {chat?.User?.username.charAt(0).toUpperCase()}
         </div>
       )}
-      {chat.Chat.chat_type!=='direct' && <BiGroup size={24}/>}
+      {chat.Chat.chat_type !== "direct" && <BiGroup size={24} />}
       <span className="text-white">
         {chat.Chat.name ? chat.Chat.name : chat.User.username}
       </span>

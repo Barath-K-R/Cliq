@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { getUser } from "../api/UserApi";
 import { CiUser } from "react-icons/ci";
-import debounce from 'lodash/debounce';
+import debounce from "lodash/debounce";
+import { FiCheck } from "react-icons/fi";
+import { FiEye } from "react-icons/fi";
 import {
   getMessages,
   addMessage,
@@ -24,39 +26,9 @@ const ChatBox = ({
     setNewMessage(e.target.value);
   };
 
-  //separating seen and unseen messages
-  useEffect(() => {
-    const updateReadReciepts = async () => {
-      console.log('Updating read receipts...');
-      console.log(messages)
-      try {
-        const unseenMessages = messages
-          .filter((message) => message?.ReadReciepts[0]?.seen_at === null)
-          .map((message) => message.id); 
-  
-        console.log('Unseen messages:', unseenMessages);
-  
-        if (unseenMessages.length > 0) {
-          const updatedReadRecieptsResponse = await updateReadReciepts({
-            messageIds: unseenMessages,
-            userId: currentUser.id,
-            date: Date.now(),
-          });
-          console.log(updatedReadRecieptsResponse);
-        }
-      } catch (error) {
-        console.error('Error updating read receipts:', error);
-      }
-    };
-    const debounceUpdate = debounce(updateReadReciepts, 300);
-    debounceUpdate();
-  }, [JSON.stringify(chat), currentUser.id]); 
-  
-  
-
   //checking chat is group or direct
   useEffect(() => {
-    if (chat?.name) setIsGroup(true);
+    if (chat?.Chat.name) setIsGroup(true);
     else setIsGroup(false);
   }, [chat]);
 
@@ -75,6 +47,29 @@ const ChatBox = ({
       try {
         const { data } = await getMessages(chat?.chat_id);
         setMessages(data);
+        console.log(data);
+        const unseenMessages = data
+          .filter((message) => {
+            console.log(!message?.ReadReciepts[0]?.seen_at);
+            if (
+              message?.ReadReciepts?.length > 0 &&
+              message?.ReadReciepts[0]?.seen_at === null &&
+              message.sender_id !== currentUser.id
+            )
+              return message;
+          })
+          .map((message) => message.id);
+
+        console.log("Unseen messages:", unseenMessages);
+
+        if (unseenMessages.length > 0) {
+          const updatedReadRecieptsResponse = await updateReadReciepts({
+            messageIds: unseenMessages,
+            userId: currentUser.id,
+            date: Date.now(),
+          });
+          console.log(updatedReadRecieptsResponse);
+        }
       } catch (error) {
         console.log(error);
       }
@@ -90,6 +85,7 @@ const ChatBox = ({
       .filter((user) => user.user_id !== currentUser.id)
       .map((user) => user.user_id);
     const newMessageData = {
+      createdAt:Date.now(),
       username: currentUser.username,
       sender_id: currentUser.id,
       message: newMessage,
@@ -102,29 +98,43 @@ const ChatBox = ({
     setMessages((prev) => [...prev, newMessageData]);
     // send message to database
     try {
-      const newMessageResponse= await addMessage(newMessageData);
-      console.log(newMessageResponse)
+      const newMessageResponse = await addMessage(newMessageData);
+      console.log(newMessageResponse);
       const readRecieptResponse = await addReadReciept({
         message_id: newMessageResponse.data.id,
         userIds: userIds,
-        date:null
+        date: null,
       });
-      console.log(readRecieptResponse)
-      
+      console.log(readRecieptResponse);
+
       setNewMessage("");
-    } catch(error){
+    } catch (error) {
       console.log(error);
     }
   };
 
   // Receive Message from parent component
   useEffect(() => {
-    console.log("Message Arrived: ", receivedMessage);
     if (receivedMessage !== null && receivedMessage.chatId === chat?.chat_id) {
       setMessages((prev) => [...prev, receivedMessage]);
     }
   }, [receivedMessage]);
 
+  const convertDateTime = (dateStr) => {
+    const date = new Date(dateStr);
+
+    let hours = date.getHours();
+    const minutes = date.getMinutes();
+    const ampm = hours >= 12 ? "PM" : "AM";
+
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+
+    const minutesStr = minutes < 10 ? "0" + minutes : minutes;
+
+    const timeString = `${hours}:${minutesStr} ${ampm}`;
+    return timeString;
+  };
   return (
     <div className="flex flex-col h-full w-full bg-slate-100">
       <div className="flex items-center h-12 border border-solid border-gray-500 shadow-2xl bg-white p-4 gap-2">
@@ -150,8 +160,20 @@ const ChatBox = ({
                   : "bg-gray-200 text-black self-start"
               }`}
             >
-              <span className="font-bold">{isGroup && message.username}</span>
-              <p>{message.message}</p>
+              <span className="font-bold">
+                {isGroup &&
+                  message.sender_id !== currentUser.id &&
+                  message?.User?.username}
+              </span>
+              <p className="text-base">{message.message}</p>
+              <div className="flex w-full justify-end items-center gap-2">
+                <span className="text-xs">
+                  {convertDateTime(message?.createdAt)}
+                </span>
+                {message?.ReadReciepts?.length > 0 &&
+                  message.ReadReciepts[0].seen_at &&
+                  message.sender_id === currentUser.id && <FiEye size={10} />}
+              </div>
             </div>
           );
         })}

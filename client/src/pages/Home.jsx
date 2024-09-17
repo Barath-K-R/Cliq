@@ -81,7 +81,8 @@ const Home = () => {
   //creating new chat
   const handleCreateChat = async (groupName) => {
     try {
-      console.log("Handle create chat" + " " + selectedUsers);
+      console.log("Handle create chat" );
+      console.log(selectedUsers)
       const data = {
         currentUserId: user.id,
         userIds: selectedUsers,
@@ -161,7 +162,7 @@ const Home = () => {
           {chats?.map((chat) => {
             return (
               <Conversations
-                key={chat.id}
+                key={chat?.chat_id}
                 chat={chat}
                 onlineUsers={onlineUsers}
                 setCurrentChat={setCurrentChat}

@@ -69,7 +69,7 @@ export const createChatSequelize = async (req, res) => {
           message: "New chat created and users added.",
         });
       } else {
-        res.send(existingChat);
+        res.send({message:"chat already exits",existingChat});
       }
     } else if (chatType === "group") {
       console.log("GROUP");
