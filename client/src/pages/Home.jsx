@@ -177,6 +177,7 @@ const Home = () => {
           chatType={chatType}
           setSendMessage={setSendMessage}
           receivedMessage={receivedMessage}
+          onlineUsers={onlineUsers}
         />
       </div>
     </>

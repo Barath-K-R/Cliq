@@ -9,6 +9,7 @@ const io = new Server(8800, {
   
   let activeUsers = [];
   
+  //for connection
   io.on("connection", (socket) => {
     // add new User
     socket.on("new-user-add", (newUserId) => {
@@ -21,6 +22,7 @@ const io = new Server(8800, {
       io.emit("get-users", activeUsers);
     });
   
+    //for disconnection
     socket.on("disconnect", () => {
       // remove user from active users
       activeUsers = activeUsers.filter((user) => user.socketId !== socket.id);
@@ -44,4 +46,6 @@ const io = new Server(8800, {
         
       }
     });
+
+    
   });

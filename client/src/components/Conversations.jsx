@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { BiGroup } from "react-icons/bi";
-const Conversations = ({ chat, setCurrentChat, onlineUsers }) => {
+const  Conversations = ({ chat, setCurrentChat, onlineUsers }) => {
   const [useronline, setuserOnline] = useState(false);
   useEffect(() => {
     const checkUserIsOnline = () => {

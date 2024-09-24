@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { getUser } from "../api/UserApi";
 import { CiUser } from "react-icons/ci";
-import debounce from "lodash/debounce";
-import { FiCheck } from "react-icons/fi";
 import { FiEye } from "react-icons/fi";
+import MessageActionModal from "./MessageActionModal.jsx";
+
 import {
   getMessages,
   addMessage,
@@ -17,11 +16,13 @@ const ChatBox = ({
   chatType,
   setSendMessage,
   receivedMessage,
+  onlineUsers,
 }) => {
   const [isGroup, setIsGroup] = useState(false);
   const [chatMembers, setchatMembers] = useState([]);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
+  const [messageActionModal, setmessageActionModal] = useState(false)
   const handleChange = (e) => {
     setNewMessage(e.target.value);
   };
@@ -47,10 +48,9 @@ const ChatBox = ({
       try {
         const { data } = await getMessages(chat?.chat_id);
         setMessages(data);
-        console.log(data);
+  
         const unseenMessages = data
           .filter((message) => {
-            console.log(!message?.ReadReciepts[0]?.seen_at);
             if (
               message?.ReadReciepts?.length > 0 &&
               message?.ReadReciepts[0]?.seen_at === null &&
@@ -60,15 +60,13 @@ const ChatBox = ({
           })
           .map((message) => message.id);
 
-        console.log("Unseen messages:", unseenMessages);
-
         if (unseenMessages.length > 0) {
           const updatedReadRecieptsResponse = await updateReadReciepts({
             messageIds: unseenMessages,
             userId: currentUser.id,
             date: Date.now(),
           });
-          console.log(updatedReadRecieptsResponse);
+          
         }
       } catch (error) {
         console.log(error);
@@ -84,8 +82,18 @@ const ChatBox = ({
     const userIds = chatMembers
       .filter((user) => user.user_id !== currentUser.id)
       .map((user) => user.user_id);
+
+    const createdAt = Date.now();
+
     const newMessageData = {
-      createdAt:Date.now(),
+      createdAt: createdAt,
+      ReadReciepts: [
+        {
+          seen_at: onlineUsers.some((user) => user.userId === userIds[0])
+            ? createdAt
+            : null,
+        },
+      ],
       username: currentUser.username,
       sender_id: currentUser.id,
       message: newMessage,
@@ -96,16 +104,17 @@ const ChatBox = ({
     // send message to socket server
     setSendMessage({ ...newMessageData, userIds });
     setMessages((prev) => [...prev, newMessageData]);
+
     // send message to database
     try {
       const newMessageResponse = await addMessage(newMessageData);
-      console.log(newMessageResponse);
+  
       const readRecieptResponse = await addReadReciept({
         message_id: newMessageResponse.data.id,
         userIds: userIds,
-        date: null,
+        date: onlineUsers.some((user) => user.userId === userIds[0]) ? createdAt : null,
       });
-      console.log(readRecieptResponse);
+      
 
       setNewMessage("");
     } catch (error) {
@@ -136,7 +145,8 @@ const ChatBox = ({
     return timeString;
   };
   return (
-    <div className="flex flex-col h-full w-full bg-slate-100">
+    <div className="flex flex-col relative h-screen w-full bg-slate-100">
+      {/* Chat header */}
       <div className="flex items-center h-12 border border-solid border-gray-500 shadow-2xl bg-white p-4 gap-2">
         <div className="w-1/6 border border-gray-100 shadow-sm cursor-pointer">
           <h1 className="font-semibold text-xl ">
@@ -148,18 +158,24 @@ const ChatBox = ({
           <span>{chatMembers.length}</span>
         </div>
       </div>
-      <div className="flex-1 flex flex-col gap-4 bg-white p-4">
+
+      {/* Scrollable message display */}
+      <div className="flex-1 flex flex-col gap-4 bg-white p-4 overflow-scroll">
         {messages.map((message, index) => {
           const isCurrentUser = message.sender_id === currentUser.id;
           return (
             <div
               key={index}
-              className={`inline-block max-w-max p-2 rounded-lg ${
+              className={`parent relative inline-block max-w-max p-2 rounded-lg ${
                 isCurrentUser
                   ? "bg-blue-500 text-white self-end"
                   : "bg-gray-200 text-black self-start"
               }`}
+              onMouseOver={()=>setmessageActionModal(true)}
+              onMouseLeave={()=>setmessageActionModal(false)}
             >
+              {messageActionModal && <MessageActionModal />}
+              
               <span className="font-bold">
                 {isGroup &&
                   message.sender_id !== currentUser.id &&
@@ -170,7 +186,7 @@ const ChatBox = ({
                 <span className="text-xs">
                   {convertDateTime(message?.createdAt)}
                 </span>
-                {message?.ReadReciepts?.length > 0 &&
+                {message?.ReadReciepts?.length===1 &&
                   message.ReadReciepts[0].seen_at &&
                   message.sender_id === currentUser.id && <FiEye size={10} />}
               </div>
@@ -178,7 +194,9 @@ const ChatBox = ({
           );
         })}
       </div>
-      <div className="flex-10 flex h-12 bg-green-400 border border-gray-400 p-4">
+
+      {/* Fixed message input */}
+      <div className="sticky bottom-0 flex w-full h-12 bg-green-400 border-t border-gray-400 p-4">
         <input
           type="text"
           className="h-6 w-5/6 rounded-xl"
