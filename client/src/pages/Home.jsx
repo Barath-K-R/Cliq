@@ -19,7 +19,7 @@ const Home = () => {
     currentUserId: null,
     userIds: [],
     chatType: "",
-    name: "", 
+    name: "",
     description: "",
     visibility: "",
     scope: "",
@@ -33,7 +33,7 @@ const Home = () => {
   const [createChannelModal, setcreateChannelModal] = useState(false);
   const [selectedUsers, setselectedUsers] = useState([]);
   const [createChatSelection, setcreateChatSelection] = useState("");
-  
+
   const user = useSelector((state) => state.user.authUser);
   const chatType = useSelector((state) => state.selection.selection);
   const socket = useRef();
@@ -81,8 +81,8 @@ const Home = () => {
   //creating new chat
   const handleCreateChat = async (groupName) => {
     try {
-      console.log("Handle create chat" );
-      console.log(selectedUsers)
+      console.log("Handle create chat");
+      console.log(selectedUsers);
       const data = {
         currentUserId: user.id,
         userIds: selectedUsers,
@@ -114,73 +114,71 @@ const Home = () => {
   };
 
   return (
-    <>
-      <div className="flex w-full">
-        <div className="flex flex-col items-center relative w-56 pt-4 gap-4 bg-blue-900">
-          <section className="flex justify-center items-center p-2 gap-6">
-            <span className="text-base text-white">Conversations </span>
-            <div
-              className="flex justify-center items-center w-4 rounded-full cursor-pointer hover:bg-gray-400  bg-slate-50"
-              onClick={() => setCreateChatModalOpened((prev) => !prev)}
-            >
-              <AiOutlinePlus size={17} />
-            </div>
-            {createChatModalOpened && (
-              <CreateChatModal
-                setCreateChatModalOpened={setCreateChatModalOpened}
-                setUserSearchModal={setUserSearchModal}
-                createChatSelection={createChatSelection}
-                setcreateChatSelection={setcreateChatSelection}
-                setcreateChannelModal={setcreateChannelModal}
-              />
-            )}
-          </section>
-
-          {userSearchModal && (
-            <UserSearchModal
-              selectedUsers={selectedUsers}
-              setselectedUsers={setselectedUsers}
+    <div className="outer-container flex w-full">
+      <div className="flex flex-col items-center relative w-56 pt-4 gap-4 bg-blue-900">
+        <section className="flex justify-center items-center p-2 gap-6">
+          <span className="text-base text-white">Conversations </span>
+          <div
+            className="flex justify-center items-center w-4 rounded-full cursor-pointer hover:bg-gray-400  bg-slate-50"
+            onClick={() => setCreateChatModalOpened((prev) => !prev)}
+          >
+            <AiOutlinePlus size={17} />
+          </div>
+          {createChatModalOpened && (
+            <CreateChatModal
+              setCreateChatModalOpened={setCreateChatModalOpened}
               setUserSearchModal={setUserSearchModal}
-              setCurrentChat={setCurrentChat}
               createChatSelection={createChatSelection}
-              handleCreateChat={handleCreateChat}
-              setchatData={setchatData}
-            />
-          )}
-
-          {createChannelModal && (
-            <CreateChannelModal
+              setcreateChatSelection={setcreateChatSelection}
               setcreateChannelModal={setcreateChannelModal}
-              selectedUsers={selectedUsers}
-              setselectedUsers={setselectedUsers}
-              chatData={chatData}
-              setchatData={setchatData}
-              handleCreateChat={handleCreateChat}
             />
           )}
+        </section>
 
-          {chats?.map((chat) => {
-            return (
-              <Conversations
-                key={chat?.chat_id}
-                chat={chat}
-                onlineUsers={onlineUsers}
-                setCurrentChat={setCurrentChat}
-              />
-            );
-          })}
-        </div>
+        {userSearchModal && (
+          <UserSearchModal
+            selectedUsers={selectedUsers}
+            setselectedUsers={setselectedUsers}
+            setUserSearchModal={setUserSearchModal}
+            setCurrentChat={setCurrentChat}
+            createChatSelection={createChatSelection}
+            handleCreateChat={handleCreateChat}
+            setchatData={setchatData}
+          />
+        )}
 
-        <ChatBox
-          chat={currentChat}
-          currentUser={user}
-          chatType={chatType}
-          setSendMessage={setSendMessage}
-          receivedMessage={receivedMessage}
-          onlineUsers={onlineUsers}
-        />
+        {createChannelModal && (
+          <CreateChannelModal
+            setcreateChannelModal={setcreateChannelModal}
+            selectedUsers={selectedUsers}
+            setselectedUsers={setselectedUsers}
+            chatData={chatData}
+            setchatData={setchatData}
+            handleCreateChat={handleCreateChat}
+          />
+        )}
+
+        {chats?.map((chat) => {
+          return (
+            <Conversations
+              key={chat?.chat_id}
+              chat={chat}
+              onlineUsers={onlineUsers}
+              setCurrentChat={setCurrentChat}
+            />
+          );
+        })}
       </div>
-    </>
+
+      <ChatBox
+        chat={currentChat}
+        currentUser={user}
+        chatType={chatType}
+        setSendMessage={setSendMessage}
+        receivedMessage={receivedMessage}
+        onlineUsers={onlineUsers}
+      />
+    </div>
   );
 };
 

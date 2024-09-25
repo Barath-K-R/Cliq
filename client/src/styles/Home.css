@@ -1,3 +1,11 @@
+.outer-container {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .outer-container::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari, and Opera */
+  }
 .create-chat-modal{
     box-shadow: 0px 4px 8px 0 rgba(0, 0, 0, 0.4);
     border-radius: 3px;

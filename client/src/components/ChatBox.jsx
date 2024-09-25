@@ -22,7 +22,7 @@ const ChatBox = ({
   const [chatMembers, setchatMembers] = useState([]);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
-  const [messageActionModal, setmessageActionModal] = useState(false)
+  const [messageActionIndex, setmessageActionIndex] = useState(null)
   const handleChange = (e) => {
     setNewMessage(e.target.value);
   };
@@ -171,10 +171,10 @@ const ChatBox = ({
                   ? "bg-blue-500 text-white self-end"
                   : "bg-gray-200 text-black self-start"
               }`}
-              onMouseOver={()=>setmessageActionModal(true)}
-              onMouseLeave={()=>setmessageActionModal(false)}
+              onMouseOver={()=>setmessageActionIndex(index)}
+              onMouseLeave={()=>setmessageActionIndex(null)}
             >
-              {messageActionModal && <MessageActionModal />}
+              {messageActionIndex===index && <MessageActionModal />}
               
               <span className="font-bold">
                 {isGroup &&
@@ -196,7 +196,7 @@ const ChatBox = ({
       </div>
 
       {/* Fixed message input */}
-      <div className="sticky bottom-0 flex w-full h-12 bg-green-400 border-t border-gray-400 p-4">
+      <div className="sticky bottom-0 flex justify-around items-center w-full h-12 bg-green-400 border-t border-gray-400 p-4">
         <input
           type="text"
           className="h-6 w-5/6 rounded-xl"

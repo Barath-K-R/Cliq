@@ -44,7 +44,10 @@ const MessageActionModal = () => {
         <div
           className={`moreactions absolute ${setIsAbove?'bottom-0':'bottom-24'}bottom-24 w-32 bg-gray-200`}
         >
-          Moreactions
+          <div className="forward"><span>Forward</span></div>
+          <div className="copylink"><span>Copy Link</span></div>
+          <div className="pin"><span>Pin</span></div>
+          
         </div>
       )}
     </>
