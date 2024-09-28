@@ -163,7 +163,9 @@ const Home = () => {
             <Conversations
               key={chat?.chat_id}
               chat={chat}
+              currentUser={user}
               onlineUsers={onlineUsers}
+              currentChat={currentChat}
               setCurrentChat={setCurrentChat}
             />
           );

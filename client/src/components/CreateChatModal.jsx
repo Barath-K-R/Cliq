@@ -10,7 +10,7 @@ const CreateChatModal = ({
 }) => {
   return (
     <div
-      className="create-chat-modal flex flex-col w-56 h-22 absolute top-12 left-40 shadow-xl list-none bg-white"
+      className="create-chat-modal flex flex-col w-56 h-22 absolute top-12 left-40 shadow-xl list-none bg-white z-50"
       onMouseLeave={() => setCreateChatModalOpened(false)}
     >
       <section

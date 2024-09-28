@@ -75,7 +75,7 @@ const CreateChannelModal = ({
   };
 
   return (
-    <div className="fixed flex justify-end inset-0 bg-black bg-opacity-55 z-0">
+    <div className="fixed flex justify-end inset-0 bg-black bg-opacity-55 z-50">
       <div className="absolute w-3/6 h-full bg-white z-50 overflow-scroll">
         {/* title */}
         <div className="flex justify-between items-center w-full h-10 p-6 bg-gray-100">

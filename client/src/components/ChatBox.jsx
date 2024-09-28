@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useRef} from "react";
 import { CiUser } from "react-icons/ci";
 import { FiEye } from "react-icons/fi";
 import MessageActionModal from "./MessageActionModal.jsx";
@@ -23,9 +23,22 @@ const ChatBox = ({
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [messageActionIndex, setmessageActionIndex] = useState(null)
+
+  const messagesEndRef = useRef(null);
+
   const handleChange = (e) => {
     setNewMessage(e.target.value);
   };
+
+  // Scroll to bottom function
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // Scroll to bottom on new message
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   //checking chat is group or direct
   useEffect(() => {
@@ -61,6 +74,7 @@ const ChatBox = ({
           .map((message) => message.id);
 
         if (unseenMessages.length > 0) {
+          console.log('unseen messages are gtraeter than zero')
           const updatedReadRecieptsResponse = await updateReadReciepts({
             messageIds: unseenMessages,
             userId: currentUser.id,
@@ -110,10 +124,9 @@ const ChatBox = ({
       const newMessageResponse = await addMessage(newMessageData);
   
       const readRecieptResponse = await addReadReciept({
-        message_id: newMessageResponse.data.id,
         userIds: userIds,
         date: onlineUsers.some((user) => user.userId === userIds[0]) ? createdAt : null,
-      });
+      },newMessageResponse.data.id,);
       
 
       setNewMessage("");
@@ -145,7 +158,7 @@ const ChatBox = ({
     return timeString;
   };
   return (
-    <div className="flex flex-col relative h-screen w-full bg-slate-100">
+    <div className="flex flex-col relative h-screen w-full bg-slate-100 z-0">
       {/* Chat header */}
       <div className="flex items-center h-12 border border-solid border-gray-500 shadow-2xl bg-white p-4 gap-2">
         <div className="w-1/6 border border-gray-100 shadow-sm cursor-pointer">
@@ -193,6 +206,8 @@ const ChatBox = ({
             </div>
           );
         })}
+         {/* Scroll to bottom reference */}
+         <div ref={messagesEndRef} />
       </div>
 
       {/* Fixed message input */}
@@ -200,6 +215,7 @@ const ChatBox = ({
         <input
           type="text"
           className="h-6 w-5/6 rounded-xl"
+          value={newMessage}
           onChange={handleChange}
         />
         <button

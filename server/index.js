@@ -58,6 +58,6 @@ app.use(cors());
 
 // Define routes
 app.use("/chat", chatRouter);
-app.use("/message", messageRouter);
+app.use("/messages", messageRouter);
 app.use("/user", UserRouter);
 app.use("/org", orgRouter);

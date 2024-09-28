@@ -40,7 +40,7 @@ export const getChatMessagesSequelize = async (req, res) => {
           attributes: ["id", "user_id", "seen_at"],
         },
       ],
-      attributes: ["id", "chat_id", "sender_id", "message","createdAt"],
+      attributes: ["id", "chat_id", "sender_id", "message", "createdAt"],
     });
 
     res.send(messages);
@@ -50,21 +50,33 @@ export const getChatMessagesSequelize = async (req, res) => {
   }
 };
 
-export const addReadReciept = async (req, res) => {
-  const { message_id, userIds,date} = req.body;
+export const addReadReceipt = async (req, res) => {
+  const { userIds, date } = req.body;
+  const { messageId } = req.params;
+
+  if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
+    return res.status(400).json({ error: "User IDs are required and must be an array." });
+  }
+
+  if (!messageId) {
+    return res.status(400).json({ error: "Message ID is required." });
+  }
 
   try {
     const readReceipts = userIds.map((userId) => ({
-      message_id,
+      message_id: messageId,
       user_id: userId,
-      seen_at:date
+      seen_at: date,
     }));
-    const newReadReciepts = await ReadRecieptModel.bulkCreate(readReceipts);
-    res.send(newReadReciepts);
+
+    const newReadReceipts = await ReadRecieptModel.bulkCreate(readReceipts);
+    res.status(201).json(newReadReceipts);
   } catch (error) {
-    console.log(error);
+    console.error("Error adding read receipts:", error);
+    res.status(500).json({ error: "An error occurred while adding read receipts." });
   }
 };
+
 
 export const updateReadReciepts = async (req, res) => {
   const { messageIds, userId, date } = req.body;
@@ -79,14 +91,43 @@ export const updateReadReciepts = async (req, res) => {
           },
           user_id: userId,
         },
-        
       }
-
     );
 
     res.status(200).json(updatedReadReciept);
   } catch (error) {
     console.log(error);
     res.status(500).json("Failed to update read receipts");
+  }
+};
+
+export const getUnseenMessagesCount = async (req, res) => {
+  console.log('counting unseen messages')
+  const {userId}=req.query
+  const {chatId}=req.params
+  try {
+    const unseenReadReceipts = await ReadRecieptModel.count({
+      where: {
+        user_id: userId,  
+        seen_at: null,     
+      },
+      include: [
+        {
+          model: MessageModel,
+          where: {
+            chat_id: chatId,
+          },
+          required: false,
+        },
+      ],
+    });
+    res.status(200).json({ unseenReadReceipts });
+  } catch (error) {
+    console.error("Error fetching unseen messages count:", error);
+    res
+      .status(500)
+      .json({
+        error: "An error occurred while fetching unseen messages count.",
+      });
   }
 };
