@@ -121,8 +121,8 @@ const UserSearchModal = ({
           {/* users list */}
           <div
             className={`flex w-5/6 ${
-              createChatSelection === "group" ? "h-3/6" : "h-5/6"
-            } flex-col gap-4 overflow-y-auto`}
+              createChatSelection === "group" ? "h-2/5" : "h-5/6"
+            } flex-col gap-4 overflow-y-scroll`}
             style={{ maxHeight: "350px" }}
           >
             {filteredUsers &&

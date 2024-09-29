@@ -4,10 +4,9 @@ import cors from "cors";
 import dotenv from "dotenv";
 import sequelize from "./config/sequelizeConfig.js";
 
-
 // Import your models
 import UserModel from "./models/UserModel.js";
-import ChatModel from './models/ChatModel.js';
+import ChatModel from "./models/ChatModel.js";
 import ChatMembersModel from "./models/ChatMembersModel.js";
 import MessageModel from "./models/MessageModel.js";
 import TeamModel from "./models/TeamModel.js";
@@ -17,13 +16,13 @@ import RoleModel from "./models/RolesModel.js";
 import ChatPermissionModel from "./models/ChatPermissionModel.js";
 import OrganizationModel from "./models/OrganizationModel.js";
 
-import './models/Association.js';
-
+import "./models/Association.js";
 
 import chatRouter from "./routes/ChatRoute.js";
 import UserRouter from "./routes/UserRoutes.js";
 import messageRouter from "./routes/MessageRoutes.js";
 import orgRouter from "./routes/OrganizationRoutes.js";
+import ThreadRouter from "./routes/ThreadRoutes.js";
 
 dotenv.config();
 
@@ -43,7 +42,7 @@ app.use(cors());
     );
 
     // Sync models
-    await sequelize.sync({ alter: true }); 
+    await sequelize.sync({ alter: true });
     console.log("All models were synchronized successfully.");
 
     // Start the server
@@ -61,3 +60,4 @@ app.use("/chat", chatRouter);
 app.use("/messages", messageRouter);
 app.use("/user", UserRouter);
 app.use("/org", orgRouter);
+app.use("/threads", ThreadRouter);

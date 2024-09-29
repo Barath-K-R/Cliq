@@ -41,6 +41,7 @@ export const getChatMessagesSequelize = async (req, res) => {
         },
       ],
       attributes: ["id", "chat_id", "sender_id", "message", "createdAt"],
+      order: [["createdAt", "ASC"]],
     });
 
     res.send(messages);

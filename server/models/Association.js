@@ -10,6 +10,7 @@ import RolesModel from "./RolesModel.js";
 import OrganizationModel from "./OrganizationModel.js";
 import ThreadModel from "./ThreadModel.js";
 import ReadRecieptModel from "./ReadReceiptModel.js";
+import ThreadMembersModel from "./ThreadMembersModel.js";
 //usermodel relatioships
 UserModel.belongsTo(OrganizationModel, {
   foreignKey: "organization_id",
@@ -33,6 +34,11 @@ UserModel.hasMany(MessageModel, {
 
 UserModel.hasMany(ReadRecieptModel, {
    foreignKey: "user_id"
+});
+
+UserModel.hasMany(ThreadMembersModel, {
+  foreignKey: "user_id",
+  onDelete: "CASCADE",
 });
 
 //chatmodel relationships
@@ -91,6 +97,10 @@ MessageModel.belongsTo(UserModel, {
 MessageModel.hasMany(ReadRecieptModel, {
   foreignKey: "message_id" 
 });
+
+MessageModel.belongsTo(ThreadModel, {
+  foreignKey: "thread_id",
+});
 //organizationmodel relatioships
 OrganizationModel.hasMany(UserModel, {
   foreignKey: "organization_id",
@@ -120,6 +130,27 @@ RolesModel.hasMany(ChatMembersModel, {
 ThreadModel.belongsTo(ChatModel, {
   foreignKey: "chatId",
 });
+
+ThreadModel.hasMany(ThreadMembersModel, {
+  foreignKey: "thread_id",
+  onDelete: "CASCADE",
+});
+
+ThreadModel.hasMany(MessageModel, {
+  foreignKey: "thread_id",
+  onDelete: "CASCADE",
+});
+
+//threadMembermodel association
+ThreadMembersModel.belongsTo(ThreadModel, {
+  foreignKey: "thread_id",
+});
+
+ThreadMembersModel.belongsTo(UserModel, {
+  foreignKey: "user_id",
+  onDelete: "CASCADE",
+});
+
 
 //ReadReciept Model
 ReadRecieptModel.belongsTo(UserModel, {

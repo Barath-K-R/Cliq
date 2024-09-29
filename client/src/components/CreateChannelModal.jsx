@@ -187,7 +187,7 @@ const CreateChannelModal = ({
 
             {addParticpantModal && (
               <div
-                className="absolute bottom-40 left-[232px] w-[62%] h-18 bg-white rounded-md z-50 p-2 shadow-xl"
+                className="absolute left-[205px] bottom-32 w-[62%] h-18 bg-white rounded-md z-50 p-2 shadow-xl"
                 onClick={() => setaddParticpantModal(false)}
                 onMouseLeave={() => setaddParticpantModal(false)}
               >
@@ -259,7 +259,11 @@ const CreateChannelModal = ({
           <div className="flex justify-end gap-12">
             <button
               className="w-28 h-10 bg-white rounded-3xl border border-gray-300 hover:bg-gray-200"
-              onClick={() => setcreateChannelModal((prev) => !prev)}
+              onClick={() => {
+                resetChatData();
+                setcreateChannelModal(false);
+                setselectedUsers([]);
+              }}
             >
               cancel
             </button>
