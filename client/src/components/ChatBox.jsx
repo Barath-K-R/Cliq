@@ -1,4 +1,4 @@
-import React, { useEffect, useState,useRef} from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { CiUser } from "react-icons/ci";
 import { FiEye } from "react-icons/fi";
 import MessageActionModal from "./MessageActionModal.jsx";
@@ -22,7 +22,7 @@ const ChatBox = ({
   const [chatMembers, setchatMembers] = useState([]);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
-  const [messageActionIndex, setmessageActionIndex] = useState(null)
+  const [messageActionIndex, setmessageActionIndex] = useState(null);
 
   const messagesEndRef = useRef(null);
 
@@ -61,7 +61,7 @@ const ChatBox = ({
       try {
         const { data } = await getMessages(chat?.chat_id);
         setMessages(data);
-  
+
         const unseenMessages = data
           .filter((message) => {
             if (
@@ -74,13 +74,12 @@ const ChatBox = ({
           .map((message) => message.id);
 
         if (unseenMessages.length > 0) {
-          console.log('unseen messages are gtraeter than zero')
+          console.log("unseen messages are gtraeter than zero");
           const updatedReadRecieptsResponse = await updateReadReciepts({
             messageIds: unseenMessages,
             userId: currentUser.id,
             date: Date.now(),
           });
-          
         }
       } catch (error) {
         console.log(error);
@@ -122,12 +121,16 @@ const ChatBox = ({
     // send message to database
     try {
       const newMessageResponse = await addMessage(newMessageData);
-  
-      const readRecieptResponse = await addReadReciept({
-        userIds: userIds,
-        date: onlineUsers.some((user) => user.userId === userIds[0]) ? createdAt : null,
-      },newMessageResponse.data.id,);
-      
+
+      const readRecieptResponse = await addReadReciept(
+        {
+          userIds: userIds,
+          date: onlineUsers.some((user) => user.userId === userIds[0])
+            ? createdAt
+            : null,
+        },
+        newMessageResponse.data.id
+      );
 
       setNewMessage("");
     } catch (error) {
@@ -184,11 +187,11 @@ const ChatBox = ({
                   ? "bg-blue-500 text-white self-end"
                   : "bg-gray-200 text-black self-start"
               }`}
-              onMouseOver={()=>setmessageActionIndex(index)}
-              onMouseLeave={()=>setmessageActionIndex(null)}
+              onMouseOver={() => setmessageActionIndex(index)}
+              onMouseLeave={() => setmessageActionIndex(null)}
             >
-              {messageActionIndex===index && <MessageActionModal />}
-              
+              {messageActionIndex === index && <MessageActionModal />}
+
               <span className="font-bold">
                 {isGroup &&
                   message.sender_id !== currentUser.id &&
@@ -199,19 +202,19 @@ const ChatBox = ({
                 <span className="text-xs">
                   {convertDateTime(message?.createdAt)}
                 </span>
-                {message?.ReadReciepts?.length===1 &&
+                {message?.ReadReciepts?.length === 1 &&
                   message.ReadReciepts[0].seen_at &&
                   message.sender_id === currentUser.id && <FiEye size={10} />}
               </div>
             </div>
           );
         })}
-         {/* Scroll to bottom reference */}
-         <div ref={messagesEndRef} />
+        {/* Scroll to bottom reference */}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Fixed message input */}
-      <div className="sticky bottom-0 flex justify-around items-center w-full h-12 bg-green-400 border-t border-gray-400 p-4">
+      <div className="sticky border bottom-0 flex justify-around items-center focus:border-none focus:outline-none w-full h-12 bg-green-400 border-t border-gray-400 p-4">
         <input
           type="text"
           className="h-6 w-5/6 rounded-xl"

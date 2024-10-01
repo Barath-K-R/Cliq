@@ -1,7 +1,7 @@
 import express from "express";
-import { createThread,addThreadMembers} from "../mysqlControllers/ThreadController.js";
+import { createThread,addMessageToThread} from "../mysqlControllers/ThreadController.js";
 const ThreadRouter = express.Router();
 
 ThreadRouter.post('/',createThread)
-ThreadRouter.post('/members', addThreadMembers);
+ThreadRouter.post('/message', addMessageToThread);
 export default ThreadRouter;

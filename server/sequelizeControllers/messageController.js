@@ -2,6 +2,7 @@ import MessageModel from "../models/MessageModel.js";
 import UserModel from "../models/UserModel.js";
 import ReadRecieptModel from "../models/ReadReceiptModel.js";
 import { Op } from "sequelize";
+
 export const addingMessageSequelize = async (req, res) => {
   console.log("Adding message");
   console.log(req.body);
@@ -40,7 +41,7 @@ export const getChatMessagesSequelize = async (req, res) => {
           attributes: ["id", "user_id", "seen_at"],
         },
       ],
-      attributes: ["id", "chat_id", "sender_id", "message", "createdAt"],
+      attributes: ["id", "chat_id", "sender_id","thread_id", "message", "createdAt"],
       order: [["createdAt", "ASC"]],
     });
 
