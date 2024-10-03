@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { CiUser } from "react-icons/ci";
 import { FiEye } from "react-icons/fi";
+import Message from "./Message.jsx";
 import MessageActionModal from "./MessageActionModal.jsx";
 
 import {
@@ -23,13 +24,30 @@ const ChatBox = ({
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [messageActionIndex, setmessageActionIndex] = useState(null);
-
+  const [currentThreadMessages, setcurrentThreadMessages] = useState([]);
+  const [expandedThreadId, setExpandedThreadId] = useState(null);
   const messagesEndRef = useRef(null);
 
   const handleChange = (e) => {
     setNewMessage(e.target.value);
-  };
+  }; 
 
+  //handling threadClick
+  const handleThreadClick = (thread_id, messageId) => {
+    if (thread_id !== expandedThreadId) {
+      setExpandedThreadId(thread_id);
+      setcurrentThreadMessages(
+        messages.filter((message) => {
+          if (message.thread_id === thread_id && message.id !== messageId)
+            return message;
+        })
+      );
+    }
+    else{
+      setExpandedThreadId(null)
+      setcurrentThreadMessages([])
+    }
+  };
   // Scroll to bottom function
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -176,36 +194,57 @@ const ChatBox = ({
       </div>
 
       {/* Scrollable message display */}
-      <div className="flex-1 flex flex-col gap-4 bg-white p-4 overflow-scroll">
+      <div className="flex-1 flex flex-col gap-2 bg-white p-4 overflow-scroll">
         {messages.map((message, index) => {
-          const isCurrentUser = message.sender_id === currentUser.id;
           return (
             <div
-              key={index}
-              className={`parent relative inline-block max-w-max p-2 rounded-lg ${
-                isCurrentUser
-                  ? "bg-blue-500 text-white self-end"
-                  : "bg-gray-200 text-black self-start"
+              className={`message flex flex-col hover:bg-gray-100 ${
+                message.is_thread_head &&
+                "border border-gray-300 shadow-lg rounded-lg cursor-pointer"
               }`}
-              onMouseOver={() => setmessageActionIndex(index)}
-              onMouseLeave={() => setmessageActionIndex(null)}
             >
-              {messageActionIndex === index && <MessageActionModal />}
+              {/* {message.is_thread_head && (
+                  <div className="line w-full min-h-[1px] h-[1px] bg-gray-400"></div>
+                )} */}
 
-              <span className="font-bold">
-                {isGroup &&
-                  message.sender_id !== currentUser.id &&
-                  message?.User?.username}
-              </span>
-              <p className="text-base">{message.message}</p>
-              <div className="flex w-full justify-end items-center gap-2">
-                <span className="text-xs">
-                  {convertDateTime(message?.createdAt)}
-                </span>
-                {message?.ReadReciepts?.length === 1 &&
-                  message.ReadReciepts[0].seen_at &&
-                  message.sender_id === currentUser.id && <FiEye size={10} />}
-              </div>
+              <Message
+                index={index}
+                message={message}
+                currentUser={currentUser}
+                isGroup={isGroup}
+                messageActionIndex={messageActionIndex}
+                setmessageActionIndex={setmessageActionIndex}
+                currentThreadMessages={currentThreadMessages}
+                onThreadClick={() =>
+                  handleThreadClick(message.thread_id, message.id)
+                }
+              />
+              {message.is_thread_head && (
+                <>
+                  <div className="line w-full h-[1px] bg-gray-200 block"></div>
+                  <div className="replies flex justify-center bg-white w-full h-6 text-sm text-blue-400">
+                    {currentThreadMessages.length} Replies
+                  </div>
+                </>
+              )}
+
+              {message.is_thread_head &&
+                expandedThreadId === message.thread_id && (
+                  <>
+                    <div className="ml-6 mt-2">
+                      {currentThreadMessages.map((threadMessage) => (
+                        <Message
+                          key={threadMessage.id}
+                          message={threadMessage}
+                          currentUser={currentUser}
+                          isGroup={isGroup}
+                          messageActionIndex={messageActionIndex}
+                          setmessageActionIndex={setmessageActionIndex}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
             </div>
           );
         })}

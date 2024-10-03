@@ -7,6 +7,7 @@ export const addingMessageSequelize = async (req, res) => {
   console.log("Adding message");
   console.log(req.body);
   const { chatId, sender_id, message } = req.body;
+  console.log(sender_id)
 
   try {
     const newMessage = await MessageModel.create({
@@ -41,7 +42,7 @@ export const getChatMessagesSequelize = async (req, res) => {
           attributes: ["id", "user_id", "seen_at"],
         },
       ],
-      attributes: ["id", "chat_id", "sender_id","thread_id", "message", "createdAt"],
+      attributes: ["id", "chat_id", "sender_id","thread_id", "message","is_thread_head", "createdAt"],
       order: [["createdAt", "ASC"]],
     });
 

@@ -40,6 +40,11 @@ const MessageModel = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: false,
     },
+    is_thread_head: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
   },
   {
     tableName: "messages",

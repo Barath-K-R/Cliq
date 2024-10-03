@@ -19,7 +19,7 @@ export const createThread = async (req, res) => {
 
     // Update the head message to set the thread_id
     await MessageModel.update(
-      { thread_id: thread.id },
+      { thread_id: thread.id, is_thread_head: true },
       { where: { id: head } }
     );
 
@@ -57,7 +57,7 @@ export const addMessageToThread = async (req, res) => {
       chat_id,
       sender_id: userId,
       thread_id,
-      message,
+      message
     });
 
     //checking whether the user already a member in thread'
