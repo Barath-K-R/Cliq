@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { CiUser } from "react-icons/ci";
+import { CgMailReply } from "react-icons/cg";
 import { FiEye } from "react-icons/fi";
 import Message from "./Message.jsx";
 import MessageActionModal from "./MessageActionModal.jsx";
@@ -10,6 +11,8 @@ import {
   retrieveMembers,
   addReadReciept,
   updateReadReciepts,
+  t,
+  addMessageToThread
 } from "../api/ChatApi";
 const ChatBox = ({
   chat,
@@ -23,17 +26,50 @@ const ChatBox = ({
   const [chatMembers, setchatMembers] = useState([]);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
+  const [replyMessage, setReplyMessage] = useState(""); 
   const [messageActionIndex, setmessageActionIndex] = useState(null);
   const [currentThreadMessages, setcurrentThreadMessages] = useState([]);
   const [expandedThreadId, setExpandedThreadId] = useState(null);
+  const [threadMap, setThreadMap] = useState({});
+  const [replyThread, setreplyThread] = useState(null);
+  
   const messagesEndRef = useRef(null);
+
+  const buildThreadMap = () => {
+    const newThreadMap = {};
+    const threadMessageIds = {};
+
+    messages.forEach((message) => {
+      if (message.thread_id) {
+        if (!newThreadMap.hasOwnProperty(message.thread_id)) {
+          newThreadMap[message.thread_id] = [];
+          threadMessageIds[message.thread_id] = new Set();
+        }
+
+        if (
+          !threadMessageIds[message.thread_id]?.has(message.id) &&
+          message.is_thread_head === false
+        ) {
+          newThreadMap[message.thread_id].push(message);
+          threadMessageIds[message.thread_id]?.add(message.id);
+        }
+      }
+    });
+    console.log(newThreadMap);
+    setThreadMap(newThreadMap);
+  };
+
+  const handleReplyChange = (e) => {
+    setReplyMessage(e.target.value); 
+  };
 
   const handleChange = (e) => {
     setNewMessage(e.target.value);
-  }; 
+  };
 
   //handling threadClick
   const handleThreadClick = (thread_id, messageId) => {
+    console.log(currentThreadMessages);
     if (thread_id !== expandedThreadId) {
       setExpandedThreadId(thread_id);
       setcurrentThreadMessages(
@@ -42,10 +78,10 @@ const ChatBox = ({
             return message;
         })
       );
-    }
-    else{
-      setExpandedThreadId(null)
-      setcurrentThreadMessages([])
+    } else {
+      setreplyThread(null);
+      setExpandedThreadId(null);
+      setcurrentThreadMessages([]);
     }
   };
   // Scroll to bottom function
@@ -56,6 +92,7 @@ const ChatBox = ({
   // Scroll to bottom on new message
   useEffect(() => {
     scrollToBottom();
+    buildThreadMap();
   }, [messages]);
 
   //checking chat is group or direct
@@ -127,7 +164,8 @@ const ChatBox = ({
       ],
       username: currentUser.username,
       sender_id: currentUser.id,
-      message: newMessage,
+      message: replyThread ? replyMessage : newMessage,
+      thread_id:replyThread?replyThread:null,
       chatId: chat.chat_id,
       chatType: chatType,
     };
@@ -182,7 +220,7 @@ const ChatBox = ({
     <div className="flex flex-col relative h-screen w-full bg-slate-100 z-0">
       {/* Chat header */}
       <div className="flex items-center h-12 border border-solid border-gray-500 shadow-2xl bg-white p-4 gap-2">
-        <div className="w-1/6 border border-gray-100 shadow-sm cursor-pointer">
+        <div className="flex justify-center items-center w-1/6 h-10 cursor-pointer">
           <h1 className="font-semibold text-xl ">
             {chat?.Chat.name ? chat.Chat.name : chat?.User.username}
           </h1>
@@ -203,10 +241,6 @@ const ChatBox = ({
                 "border border-gray-300 shadow-lg rounded-lg cursor-pointer"
               }`}
             >
-              {/* {message.is_thread_head && (
-                  <div className="line w-full min-h-[1px] h-[1px] bg-gray-400"></div>
-                )} */}
-
               <Message
                 index={index}
                 message={message}
@@ -219,32 +253,60 @@ const ChatBox = ({
                   handleThreadClick(message.thread_id, message.id)
                 }
               />
-              {message.is_thread_head && (
-                <>
-                  <div className="line w-full h-[1px] bg-gray-200 block"></div>
-                  <div className="replies flex justify-center bg-white w-full h-6 text-sm text-blue-400">
-                    {currentThreadMessages.length} Replies
-                  </div>
-                </>
-              )}
 
               {message.is_thread_head &&
                 expandedThreadId === message.thread_id && (
-                  <>
-                    <div className="ml-6 mt-2">
-                      {currentThreadMessages.map((threadMessage) => (
-                        <Message
-                          key={threadMessage.id}
-                          message={threadMessage}
-                          currentUser={currentUser}
-                          isGroup={isGroup}
-                          messageActionIndex={messageActionIndex}
-                          setmessageActionIndex={setmessageActionIndex}
-                        />
-                      ))}
-                    </div>
-                  </>
+                  <div className="flex flex-col ml-6 mt-2">
+                    {currentThreadMessages.map((threadMessage) => (
+                      <Message
+                        key={threadMessage.id}
+                        message={threadMessage}
+                        currentUser={currentUser}
+                        isGroup={isGroup}
+                        expandedThreadId={expandedThreadId}
+                        messageActionIndex={messageActionIndex}
+                        setmessageActionIndex={setmessageActionIndex}
+                      />
+                    ))}
+                  </div>
                 )}
+              {message.is_thread_head &&
+                expandedThreadId === message.thread_id &&
+                replyThread && (
+                  <div className="border bottom-0 flex justify-evenly items-center focus:border-none focus:outline-none w-full h-18 bg-white p-4">
+                    <input
+                      type="text"
+                      className="h-8 w-10/12 rounded-md border border-blue-400 focus:outline-none p-2"
+                      value={replyMessage}
+                      onChange={handleReplyChange}
+                    />
+                    <button
+                      className="h-7 w-14 bg-blue-500 hover:bg-blue-600 rounded-md"
+                      onClick={handleSend}
+                    >
+                      Send
+                    </button>
+                  </div>
+                )}
+
+              {message.is_thread_head && (
+                <>
+                  <div className="line w-full h-[1px] bg-gray-200 block"></div>
+                  <div className="replies flex justify-between items-center px-2 bg-white w-full h-6 text-sm ">
+                    <span className="text-blue-400">
+                      {threadMap[message.thread_id]?.length} Replies
+                    </span>
+                    <section className="flex gap-2 justify-evenly">
+                      <CgMailReply
+                        size={17}
+                        className="hover:text-blue-400 cursor-pointer"
+                        onClick={() => setreplyThread(message.thread_id)}
+                      />
+                      <CiUser className="hover:text-blue-400 cursor-pointer" />
+                    </section>
+                  </div>
+                </>
+              )}
             </div>
           );
         })}
@@ -253,15 +315,15 @@ const ChatBox = ({
       </div>
 
       {/* Fixed message input */}
-      <div className="sticky border bottom-0 flex justify-around items-center focus:border-none focus:outline-none w-full h-12 bg-green-400 border-t border-gray-400 p-4">
+      <div className="sticky border bottom-0 flex justify-evenly items-center focus:border-none focus:outline-none w-full h-18 bg-white p-4">
         <input
           type="text"
-          className="h-6 w-5/6 rounded-xl"
+          className="h-8 w-10/12 rounded-md border border-blue-400 focus:outline-none p-2"
           value={newMessage}
           onChange={handleChange}
         />
         <button
-          className="h-7 w-14 bg-blue-500 rounded-md"
+          className="h-7 w-14 bg-blue-500 hover:bg-blue-600 rounded-md"
           onClick={handleSend}
         >
           Send

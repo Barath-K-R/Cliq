@@ -9,10 +9,9 @@ const Message = ({
   messageActionIndex,
   message,
   onThreadClick,
+  expandedThreadId,
   currentThreadMessages,
 }) => {
-  const [expandedThreadId, setExpandedThreadId] = useState(null);
-
   const isCurrentUser = message.sender_id === currentUser.id;
 
   const convertDateTime = (dateStr) => {
@@ -40,7 +39,7 @@ const Message = ({
 
   return (
     <>
-      {(message.is_thread_head || message.thread_id === null) && (
+      {(message.is_thread_head || message.thread_id === null || expandedThreadId===message.thread_id) && (
         <div
           key={index}
           className={`parent flex-col relative inline-block max-w-max p-2  rounded-lg ${
@@ -53,9 +52,9 @@ const Message = ({
           {messageActionIndex === index && <MessageActionModal />}
 
           <span className="font-bold">
-            {isGroup &&
-              message.sender_id !== currentUser.id ?
-              message?.User?.username:'you'}
+            {isGroup && message.sender_id !== currentUser.id
+              ? message?.User?.username
+              : "you"}
           </span>
           <section>
             <p className="text-base">{message.message}</p>
@@ -68,15 +67,6 @@ const Message = ({
               message.ReadReciepts[0].seen_at &&
               message.sender_id === currentUser.id && <FiEye size={10} />}
           </section>
-          
-          {/* replies */}
-          {/* {message.is_thread_head && (
-            <div
-              className='replies w-full h-4 text-sm text-blue-400'
-            >
-              {currentThreadMessages.length} Replies
-            </div>
-          )} */}
         </div>
       )}
     </>
