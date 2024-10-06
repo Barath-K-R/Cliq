@@ -45,24 +45,24 @@ export const createThread = async (req, res) => {
 };
 
 export const addMessageToThread = async (req, res) => {
-  const { thread_id, userId, message, chat_id } = req.body;
+  const { thread_id, sender_id, message, chatId } = req.body;
 
-  if (!thread_id || !userId || !message || !chat_id) {
+  if (!thread_id || !sender_id || !message || !chatId) {
     return res.status(400).json({ error: "some fields are missing" });
   }
 
   try {
     //adding new message in the thread
     const newMessage = await MessageModel.create({
-      chat_id,
-      sender_id: userId,
+      chat_id: chatId,
+      sender_id,
       thread_id,
-      message
+      message,
     });
 
     //checking whether the user already a member in thread'
     const existingMember = await ThreadMembersModel.findOne({
-      where: { thread_id, user_id: userId },
+      where: { thread_id, user_id: sender_id },
     });
 
     let newThreadMember = null;
@@ -70,15 +70,11 @@ export const addMessageToThread = async (req, res) => {
     if (!existingMember) {
       newThreadMember = await ThreadMembersModel.create({
         thread_id,
-        user_id: userId,
+        user_id: sender_id,
       });
     }
 
-    return res.status(201).json({
-      message: "message added successfully.",
-      members: newThreadMember,
-      message: newMessage,
-    });
+    return res.status(201).json(newMessage);
   } catch (error) {
     console.error("Error adding message to thread:", error);
     return res.status(500).json({ error: "Failed to add message to thread." });

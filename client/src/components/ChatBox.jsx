@@ -1,9 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import { CiUser } from "react-icons/ci";
 import { CgMailReply } from "react-icons/cg";
-import { FiEye } from "react-icons/fi";
 import Message from "./Message.jsx";
-import MessageActionModal from "./MessageActionModal.jsx";
+
 
 import {
   getMessages,
@@ -11,7 +10,6 @@ import {
   retrieveMembers,
   addReadReciept,
   updateReadReciepts,
-  t,
   addMessageToThread
 } from "../api/ChatApi";
 const ChatBox = ({
@@ -68,13 +66,13 @@ const ChatBox = ({
   };
 
   //handling threadClick
-  const handleThreadClick = (thread_id, messageId) => {
+  const handleThreadClick = (thread_id) => {
     console.log(currentThreadMessages);
     if (thread_id !== expandedThreadId) {
       setExpandedThreadId(thread_id);
       setcurrentThreadMessages(
         messages.filter((message) => {
-          if (message.thread_id === thread_id && message.id !== messageId)
+          if (message.thread_id === thread_id && !message.is_thread_head)
             return message;
         })
       );
@@ -84,6 +82,7 @@ const ChatBox = ({
       setcurrentThreadMessages([]);
     }
   };
+  
   // Scroll to bottom function
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -146,7 +145,7 @@ const ChatBox = ({
 
   //handling sent messages
   const handleSend = async (e) => {
-    e.preventDefault();
+    console.log(replyThread)
     const userIds = chatMembers
       .filter((user) => user.user_id !== currentUser.id)
       .map((user) => user.user_id);
@@ -168,16 +167,27 @@ const ChatBox = ({
       thread_id:replyThread?replyThread:null,
       chatId: chat.chat_id,
       chatType: chatType,
+      is_thread_head:false
     };
 
     // send message to socket server
     setSendMessage({ ...newMessageData, userIds });
     setMessages((prev) => [...prev, newMessageData]);
 
+    //updating currentThreadMessages if it is reply to thread
+    if(replyThread){
+       setcurrentThreadMessages(prev=>[...prev,newMessageData])
+    }
+
     // send message to database
     try {
-      const newMessageResponse = await addMessage(newMessageData);
-
+      let newMessageResponse=null;
+      if(!replyThread)
+        newMessageResponse = await addMessage(newMessageData);
+      else{
+        newMessageResponse=await addMessageToThread(newMessageData);
+      }
+      console.log(newMessageResponse)
       const readRecieptResponse = await addReadReciept(
         {
           userIds: userIds,
@@ -198,6 +208,8 @@ const ChatBox = ({
   useEffect(() => {
     if (receivedMessage !== null && receivedMessage.chatId === chat?.chat_id) {
       setMessages((prev) => [...prev, receivedMessage]);
+      if(receivedMessage.thread_id)
+        setcurrentThreadMessages(prev=>[...prev,receivedMessage])
     }
   }, [receivedMessage]);
 
@@ -250,7 +262,7 @@ const ChatBox = ({
                 setmessageActionIndex={setmessageActionIndex}
                 currentThreadMessages={currentThreadMessages}
                 onThreadClick={() =>
-                  handleThreadClick(message.thread_id, message.id)
+                  handleThreadClick(message.thread_id)
                 }
               />
 
