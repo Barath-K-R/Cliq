@@ -39,24 +39,26 @@ const Message = ({
 
   return (
     <>
-      {(message.is_thread_head || message.thread_id === null || expandedThreadId===message.thread_id) && (
+      {(message.is_thread_head ||
+        message.thread_id === null ||
+        expandedThreadId === message.thread_id) && (
         <div
           key={index}
-          className={`parent flex-col relative inline-block max-w-max p-2  rounded-lg ${
+          className={`parent flex-col relative inline-block max-w-max p-2 rounded-lg ${
             isCurrentUser ? " self-end" : "self-start"
           }`}
           onMouseOver={() => setmessageActionIndex(index)}
           onMouseLeave={() => setmessageActionIndex(null)}
           onClick={handleThreadClick}
         >
-          {messageActionIndex === index && <MessageActionModal />}
+          {messageActionIndex === index && <MessageActionModal isCurrentUser={isCurrentUser} message={message}/>}
 
-          <span className="font-bold">
-            {isGroup && message.sender_id !== currentUser.id
-              ? message?.User?.username
-              : "you"}
-          </span>
-          <section>
+          <section className={`flex flex-col ${isCurrentUser?'items-end':'items-start'}`}>
+            <span className="font-bold">
+              {isGroup && message.sender_id !== currentUser.id
+                ? message?.User?.username
+                : "you"}
+            </span>
             <p className="text-base">{message.message}</p>
             {/* timing */}
             <span className="text-xs">

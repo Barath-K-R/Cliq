@@ -161,7 +161,8 @@ const ChatBox = ({
             : null,
         },
       ],
-      username: currentUser.username,
+      // username: currentUser.username,
+      User:{username:currentUser.username},
       sender_id: currentUser.id,
       message: replyThread ? replyMessage : newMessage,
       thread_id:replyThread?replyThread:null,
@@ -244,7 +245,7 @@ const ChatBox = ({
       </div>
 
       {/* Scrollable message display */}
-      <div className="flex-1 flex flex-col gap-2 bg-white p-4 overflow-scroll">
+      <div className="flex-1 flex flex-col gap-2 bg-white p-2 pt-8 overflow-scroll">
         {messages.map((message, index) => {
           return (
             <div
@@ -268,7 +269,7 @@ const ChatBox = ({
 
               {message.is_thread_head &&
                 expandedThreadId === message.thread_id && (
-                  <div className="flex flex-col ml-6 mt-2">
+                  <div className="flex flex-col m-2 mt-2">
                     {currentThreadMessages.map((threadMessage) => (
                       <Message
                         key={threadMessage.id}

@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import { CgMailForward } from "react-icons/cg";
-
+import { BiMessageAltDetail } from "react-icons/bi";
 import { TfiMore } from "react-icons/tfi";
 
-const MessageActionModal = () => {
+const MessageActionModal = ({ isCurrentUser, message }) => {
   const [moreActions, setMoreActions] = useState(false);
   const [position, setPosition] = useState("");
   const parentRef = useRef(null);
@@ -31,13 +31,21 @@ const MessageActionModal = () => {
     <>
       <div
         ref={parentRef}
-        className="actions absolute flex items-center justify-around gap-2 bg-white shadow-lg bottom-[90%] left-[70%] w-auto h-6 z-10"
+        className={`actions absolute flex items-center justify-around gap-2 bg-white shadow-lg bottom-[90%] ${
+          isCurrentUser ? "right-0" : "left-0"
+        } w-auto h-6 z-10`}
       >
         <div className="reaction"></div>
         <div className="w-[1px] bg-gray-400 h-4/6 rounded-sm"></div>
         <div className="forward flex items-center justify-center w-6 h-full hover:bg-blue-100 hover:text-blue-400 cursor-pointer">
           <CgMailForward />
         </div>
+        {!message.thread_id && (
+          <div className="replyinthread flex items-center justify-center w-6 h-full hover:bg-blue-100 hover:text-blue-400 cursor-pointer">
+            <BiMessageAltDetail />
+          </div>
+        )}
+
         <div
           className="more flex items-center justify-center w-6 h-full hover:bg-blue-100 hover:text-blue-400 cursor-pointer"
           onClick={() => setMoreActions((prev) => !prev)}
