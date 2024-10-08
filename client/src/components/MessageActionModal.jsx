@@ -1,12 +1,38 @@
 import React, { useState, useRef, useEffect } from "react";
+import { createThread } from "../api/ChatApi.js";
+
 import { CgMailForward } from "react-icons/cg";
 import { BiMessageAltDetail } from "react-icons/bi";
 import { TfiMore } from "react-icons/tfi";
+import { useSelector } from "react-redux";
 
-const MessageActionModal = ({ isCurrentUser, message }) => {
+
+const MessageActionModal = ({ isCurrentUser,setreplyThread, message, setMessages,setExpandedThreadHead}) => {
   const [moreActions, setMoreActions] = useState(false);
   const [position, setPosition] = useState("");
   const parentRef = useRef(null);
+
+  const currentUser = useSelector((state) => state.user.authUser);
+
+  //converting normal message to threadhead
+  const messageToThread = () => {
+    console.log('mssg to thread')
+    setExpandedThreadHead(message)
+    setreplyThread("new")
+    setMessages(prev => {
+      return prev.map(msg => {
+        if (msg.id === message.id) {
+          console.log(msg)
+          return { ...msg, is_thread_head: true}; 
+        }
+        return msg; 
+      });
+    });
+  };
+
+  
+  
+
 
   useEffect(() => {
     if (parentRef.current) {
@@ -40,9 +66,11 @@ const MessageActionModal = ({ isCurrentUser, message }) => {
         <div className="forward flex items-center justify-center w-6 h-full hover:bg-blue-100 hover:text-blue-400 cursor-pointer">
           <CgMailForward />
         </div>
-        {!message.thread_id && (
-          <div className="replyinthread flex items-center justify-center w-6 h-full hover:bg-blue-100 hover:text-blue-400 cursor-pointer">
-            <BiMessageAltDetail />
+        {!message.thread_id && message.sender_id!==currentUser.id && (
+          <div
+            className="replyinthread flex items-center justify-center w-6 h-full hover:bg-blue-100 hover:text-blue-400 cursor-pointer"
+          >
+            <BiMessageAltDetail onClick={messageToThread} />
           </div>
         )}
 
@@ -55,13 +83,14 @@ const MessageActionModal = ({ isCurrentUser, message }) => {
       </div>
       {moreActions && (
         <div
-          className={`moreactions absolute w-32 bg-white shadow-lg ${
+          className={`absolute w-32 h-24 ${
             position === "below"
-              ? "top-0 mt-2"
+              ? "top-3"
               : position === "middle"
-              ? "top-1/2 transform -translate-y-1/2"
-              : "bottom-full mb-2"
-          } left-[70%] z-20`}
+              ? "top-3 "
+              : "bottom-[120%]"
+          } bg-white shadow-lg 
+          ${isCurrentUser ? "right-0" : "left-0"} z-20`}
         >
           <section className="m-2">
             <div className="forward hover:bg-blue-100 cursor-pointer hover:text-blue-400 rounded-sm">

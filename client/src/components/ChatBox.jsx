@@ -2,36 +2,42 @@ import React, { useEffect, useState, useRef } from "react";
 import { CiUser } from "react-icons/ci";
 import { CgMailReply } from "react-icons/cg";
 import Message from "./Message.jsx";
-
-
+import EmojiPicker, { EmojiStyle } from "emoji-picker-react";
+import { BsEmojiSmile } from "react-icons/bs";
+import { useSelector } from "react-redux";
+import { v4 as uuidv4 } from "uuid";
 import {
   getMessages,
   addMessage,
   retrieveMembers,
   addReadReciept,
   updateReadReciepts,
-  addMessageToThread
+  addMessageToThread,
+  createThread,
 } from "../api/ChatApi";
 const ChatBox = ({
   chat,
-  currentUser,
   chatType,
   setSendMessage,
   receivedMessage,
   onlineUsers,
 }) => {
   const [isGroup, setIsGroup] = useState(false);
+  const [chosenEmoji, setChosenEmoji] = useState(null);
+  const [emojiPickerOpen, setemojiPickerOpen] = useState(false);
   const [chatMembers, setchatMembers] = useState([]);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
-  const [replyMessage, setReplyMessage] = useState(""); 
+  const [replyMessage, setReplyMessage] = useState("");
   const [messageActionIndex, setmessageActionIndex] = useState(null);
   const [currentThreadMessages, setcurrentThreadMessages] = useState([]);
-  const [expandedThreadId, setExpandedThreadId] = useState(null);
+  const [expandedThreadHead, setExpandedThreadHead] = useState(null);
   const [threadMap, setThreadMap] = useState({});
-  const [replyThread, setreplyThread] = useState(null);
-  
+  const [replyThread, setreplyThread] = useState("");
+
   const messagesEndRef = useRef(null);
+
+  const currentUser = useSelector((state) => state.user.authUser);
 
   const buildThreadMap = () => {
     const newThreadMap = {};
@@ -58,31 +64,40 @@ const ChatBox = ({
   };
 
   const handleReplyChange = (e) => {
-    setReplyMessage(e.target.value); 
+    setReplyMessage(e.target.value);
+  };
+
+  const handleEmojiClick = (emojiData) => {
+    if (emojiData.emoji) {
+      setNewMessage((prev) => prev + emojiData.emoji);
+    }
   };
 
   const handleChange = (e) => {
+    console.log(e.target.value);
     setNewMessage(e.target.value);
   };
 
-  //handling threadClick
-  const handleThreadClick = (thread_id) => {
-    console.log(currentThreadMessages);
-    if (thread_id !== expandedThreadId) {
-      setExpandedThreadId(thread_id);
-      setcurrentThreadMessages(
-        messages.filter((message) => {
-          if (message.thread_id === thread_id && !message.is_thread_head)
-            return message;
-        })
-      );
-    } else {
-      setreplyThread(null);
-      setExpandedThreadId(null);
+  const updateExpandThreadHead = (mssg) => {
+    console.log(mssg.id);
+    console.log(expandedThreadHead?.id);
+    if (mssg.id !== expandedThreadHead?.id) setExpandedThreadHead(mssg);
+    else {
+      setreplyThread("");
+      setExpandedThreadHead(null);
       setcurrentThreadMessages([]);
     }
   };
-  
+  //handling threadClick
+  const updateCurrentMessages = (mssg) => {
+    setcurrentThreadMessages(
+      messages.filter((message) => {
+        if (message.thread_id === mssg.thread_id && !message.is_thread_head)
+          return message;
+      })
+    );
+  };
+
   // Scroll to bottom function
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -145,7 +160,14 @@ const ChatBox = ({
 
   //handling sent messages
   const handleSend = async (e) => {
-    console.log(replyThread)
+    const tempThreadId =uuidv4();
+
+    setExpandedThreadHead((prev) => {
+      return { ...prev, thread_id: tempThreadId };
+    });
+
+    setemojiPickerOpen(false);
+
     const userIds = chatMembers
       .filter((user) => user.user_id !== currentUser.id)
       .map((user) => user.user_id);
@@ -162,13 +184,13 @@ const ChatBox = ({
         },
       ],
       // username: currentUser.username,
-      User:{username:currentUser.username},
+      User: { username: currentUser.username },
       sender_id: currentUser.id,
-      message: replyThread ? replyMessage : newMessage,
-      thread_id:replyThread?replyThread:null,
+      message: replyThread !== "" ? replyMessage : newMessage,
+      thread_id: tempThreadId || null,
       chatId: chat.chat_id,
       chatType: chatType,
-      is_thread_head:false
+      is_thread_head: false,
     };
 
     // send message to socket server
@@ -176,19 +198,32 @@ const ChatBox = ({
     setMessages((prev) => [...prev, newMessageData]);
 
     //updating currentThreadMessages if it is reply to thread
-    if(replyThread){
-       setcurrentThreadMessages(prev=>[...prev,newMessageData])
+    if (replyThread !== "") {
+      setcurrentThreadMessages((prev) => [...prev, newMessageData]);
     }
 
     // send message to database
     try {
-      let newMessageResponse=null;
-      if(!replyThread)
+      let newMessageResponse = null;
+      if (replyThread === "")
         newMessageResponse = await addMessage(newMessageData);
-      else{
-        newMessageResponse=await addMessageToThread(newMessageData);
+      else if (replyThread === "old") {
+        newMessageResponse = await addMessageToThread(newMessageData);
+      } else {
+        newMessageResponse = await createThread({
+          ...newMessageData,
+          head: expandedThreadHead.id,
+          userIds: [expandedThreadHead.sender_id, currentUser.id],
+        });
+        setMessages((prevMessages) =>
+          prevMessages.map((message) =>
+            message.thread_id === tempThreadId
+              ? { ...message, thread_id: newMessageResponse.thread_id }
+              : message
+          )
+        );
       }
-      console.log(newMessageResponse)
+      console.log(newMessageResponse);
       const readRecieptResponse = await addReadReciept(
         {
           userIds: userIds,
@@ -209,8 +244,8 @@ const ChatBox = ({
   useEffect(() => {
     if (receivedMessage !== null && receivedMessage.chatId === chat?.chat_id) {
       setMessages((prev) => [...prev, receivedMessage]);
-      if(receivedMessage.thread_id)
-        setcurrentThreadMessages(prev=>[...prev,receivedMessage])
+      if (receivedMessage.thread_id)
+        setcurrentThreadMessages((prev) => [...prev, receivedMessage]);
     }
   }, [receivedMessage]);
 
@@ -253,22 +288,29 @@ const ChatBox = ({
                 message.is_thread_head &&
                 "border border-gray-300 shadow-lg rounded-lg cursor-pointer"
               }`}
+              
             >
               <Message
                 index={index}
                 message={message}
+                setMessages={setMessages}
                 currentUser={currentUser}
                 isGroup={isGroup}
+                setreplyThread={setreplyThread}
+                setExpandedThreadHead={setExpandedThreadHead}
                 messageActionIndex={messageActionIndex}
                 setmessageActionIndex={setmessageActionIndex}
                 currentThreadMessages={currentThreadMessages}
-                onThreadClick={() =>
-                  handleThreadClick(message.thread_id)
-                }
+                onClick={() => {
+                  if (message.is_thread_head) {
+                    updateExpandThreadHead(message);
+                    updateCurrentMessages(message);
+                  }
+                }}
               />
 
               {message.is_thread_head &&
-                expandedThreadId === message.thread_id && (
+                expandedThreadHead?.id === message.id && (
                   <div className="flex flex-col m-2 mt-2">
                     {currentThreadMessages.map((threadMessage) => (
                       <Message
@@ -276,7 +318,7 @@ const ChatBox = ({
                         message={threadMessage}
                         currentUser={currentUser}
                         isGroup={isGroup}
-                        expandedThreadId={expandedThreadId}
+                        expandedThreadHead={expandedThreadHead}
                         messageActionIndex={messageActionIndex}
                         setmessageActionIndex={setmessageActionIndex}
                       />
@@ -284,8 +326,8 @@ const ChatBox = ({
                   </div>
                 )}
               {message.is_thread_head &&
-                expandedThreadId === message.thread_id &&
-                replyThread && (
+                expandedThreadHead?.id === message.id &&
+                replyThread !== "" && (
                   <div className="border bottom-0 flex justify-evenly items-center focus:border-none focus:outline-none w-full h-18 bg-white p-4">
                     <input
                       type="text"
@@ -313,7 +355,7 @@ const ChatBox = ({
                       <CgMailReply
                         size={17}
                         className="hover:text-blue-400 cursor-pointer"
-                        onClick={() => setreplyThread(message.thread_id)}
+                        onClick={() => setreplyThread("old")}
                       />
                       <CiUser className="hover:text-blue-400 cursor-pointer" />
                     </section>
@@ -335,6 +377,22 @@ const ChatBox = ({
           value={newMessage}
           onChange={handleChange}
         />
+        <BsEmojiSmile
+          size={20}
+          className="cursor-pointer"
+          onClick={() => setemojiPickerOpen((prev) => !prev)}
+        />
+        <div className="emojipicker absolute bottom-16 right-10">
+          <EmojiPicker
+            open={emojiPickerOpen}
+            onEmojiClick={handleEmojiClick}
+            width={290}
+            height={300}
+            emojiStyle={EmojiStyle.GOOGLE}
+            previewConfig={{ showPreview: false }}
+          />
+        </div>
+
         <button
           className="h-7 w-14 bg-blue-500 hover:bg-blue-600 rounded-md"
           onClick={handleSend}

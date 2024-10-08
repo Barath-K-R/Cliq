@@ -174,7 +174,6 @@ const Home = () => {
 
       <ChatBox
         chat={currentChat}
-        currentUser={user}
         chatType={chatType}
         setSendMessage={setSendMessage}
         receivedMessage={receivedMessage}

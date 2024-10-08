@@ -1,17 +1,19 @@
 import React, { useState } from "react";
 import MessageActionModal from "./MessageActionModal.jsx";
 import { FiEye } from "react-icons/fi";
+import { useSelector } from "react-redux";
 const Message = ({
   index,
-  currentUser,
   isGroup,
   setmessageActionIndex,
   messageActionIndex,
   message,
-  onThreadClick,
-  expandedThreadId,
-  currentThreadMessages,
+  setExpandedThreadHead,
+  expandedThreadHead,
+  setMessages,
+  setreplyThread
 }) => {
+  const currentUser = useSelector((state) => state.user.authUser);
   const isCurrentUser = message.sender_id === currentUser.id;
 
   const convertDateTime = (dateStr) => {
@@ -30,18 +32,11 @@ const Message = ({
     return timeString;
   };
 
-  const handleThreadClick = () => {
-    if (message.is_thread_head && onThreadClick) {
-      console.log(message.thread_id);
-      onThreadClick(message.thread_id, message.id);
-    }
-  };
-
   return (
     <>
       {(message.is_thread_head ||
         message.thread_id === null ||
-        expandedThreadId === message.thread_id) && (
+        expandedThreadHead?.thread_id === message.thread_id) && (
         <div
           key={index}
           className={`parent flex-col relative inline-block max-w-max p-2 rounded-lg ${
@@ -49,11 +44,22 @@ const Message = ({
           }`}
           onMouseOver={() => setmessageActionIndex(index)}
           onMouseLeave={() => setmessageActionIndex(null)}
-          onClick={handleThreadClick}
         >
-          {messageActionIndex === index && <MessageActionModal isCurrentUser={isCurrentUser} message={message}/>}
+          {messageActionIndex === index && (
+            <MessageActionModal
+              isCurrentUser={isCurrentUser}
+              message={message}
+              setMessages={setMessages}
+              setExpandedThreadHead={setExpandedThreadHead}
+              setreplyThread={setreplyThread}
+            />
+          )}
 
-          <section className={`flex flex-col ${isCurrentUser?'items-end':'items-start'}`}>
+          <section
+            className={`flex flex-col ${
+              isCurrentUser ? "items-end" : "items-start"
+            }`}
+          >
             <span className="font-bold">
               {isGroup && message.sender_id !== currentUser.id
                 ? message?.User?.username

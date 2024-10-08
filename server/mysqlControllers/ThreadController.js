@@ -3,7 +3,8 @@ import ThreadModel from "../models/ThreadModel.js";
 import MessageModel from "../models/MessageModel.js";
 
 export const createThread = async (req, res) => {
-  const { chat_id, sender_id, head, userIds, message } = req.body;
+  console.log(req.body)
+  const { chatId, sender_id, head, userIds, message } = req.body;
   try {
     if (head) {
       const message = await MessageModel.findByPk(head);
@@ -13,7 +14,7 @@ export const createThread = async (req, res) => {
     }
 
     const thread = await ThreadModel.create({
-      chat_id,
+      chat_id:chatId,
       head,
     });
 
@@ -31,13 +32,13 @@ export const createThread = async (req, res) => {
     await ThreadMembersModel.bulkCreate(threadMembers);
 
     const newMessage = await MessageModel.create({
-      chat_id,
+      chat_id:chatId,
       thread_id: thread.id,
       sender_id,
       message,
     });
 
-    return res.status(201).json({ thread, members: threadMembers });
+    return res.status(201).json(newMessage);
   } catch (error) {
     console.error("Error creating thread:", error);
     return res.status(500).json({ error: "Failed to create thread." });
