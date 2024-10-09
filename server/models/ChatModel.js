@@ -58,6 +58,4 @@ const ChatModel = sequelize.define(
   }
 );
 
-
-
 export default ChatModel;

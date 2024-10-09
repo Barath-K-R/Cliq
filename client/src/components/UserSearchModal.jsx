@@ -25,7 +25,7 @@ const UserSearchModal = ({
     }
   }, [selectedUsers, createChatSelection]);
 
-  //fetching all organization users
+  //fetching all organization users      
   useEffect(() => {
     const fetchOrgUsers = async () => {
       try {
@@ -53,8 +53,6 @@ const UserSearchModal = ({
   }, [searchTerm]);
 
   const handleUserClick = (user) => {
-    console.log('handling user click');
-    console.log(user);
     
     if (selectedUsers.some((item) => item.id === user.id)) {
       // setselectedUsers user already in selectedUsers

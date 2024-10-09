@@ -3,7 +3,7 @@ import ThreadModel from "../models/ThreadModel.js";
 import MessageModel from "../models/MessageModel.js";
 
 export const createThread = async (req, res) => {
-  console.log(req.body)
+  console.log(req.body);
   const { chatId, sender_id, head, userIds, message } = req.body;
   try {
     if (head) {
@@ -14,7 +14,7 @@ export const createThread = async (req, res) => {
     }
 
     const thread = await ThreadModel.create({
-      chat_id:chatId,
+      chat_id: chatId,
       head,
     });
 
@@ -32,7 +32,7 @@ export const createThread = async (req, res) => {
     await ThreadMembersModel.bulkCreate(threadMembers);
 
     const newMessage = await MessageModel.create({
-      chat_id:chatId,
+      chat_id: chatId,
       thread_id: thread.id,
       sender_id,
       message,

@@ -25,7 +25,7 @@ const  Conversations = ({ chat,currentChat, setCurrentChat, onlineUsers,currentU
      const getunseenMessageCount=async()=>{
         try {
           const unseenCountResponse=await unseenMessageCount(chat.chat_id,currentUser.id);
-          console.log(unseenCountResponse)
+          
           setunssenMessagesCount(unseenCountResponse.data.unseenReadReceipts)
         } catch (error) {
            console.log(error)

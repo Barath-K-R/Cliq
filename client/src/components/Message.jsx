@@ -11,7 +11,8 @@ const Message = ({
   setExpandedThreadHead,
   expandedThreadHead,
   setMessages,
-  setreplyThread
+  setreplyThread,
+  onThreadClick
 }) => {
   const currentUser = useSelector((state) => state.user.authUser);
   const isCurrentUser = message.sender_id === currentUser.id;
@@ -44,6 +45,7 @@ const Message = ({
           }`}
           onMouseOver={() => setmessageActionIndex(index)}
           onMouseLeave={() => setmessageActionIndex(null)}
+          onClick={onThreadClick}
         >
           {messageActionIndex === index && (
             <MessageActionModal

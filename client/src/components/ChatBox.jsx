@@ -59,7 +59,6 @@ const ChatBox = ({
         }
       }
     });
-    console.log(newThreadMap);
     setThreadMap(newThreadMap);
   };
 
@@ -74,13 +73,10 @@ const ChatBox = ({
   };
 
   const handleChange = (e) => {
-    console.log(e.target.value);
     setNewMessage(e.target.value);
   };
 
   const updateExpandThreadHead = (mssg) => {
-    console.log(mssg.id);
-    console.log(expandedThreadHead?.id);
     if (mssg.id !== expandedThreadHead?.id) setExpandedThreadHead(mssg);
     else {
       setreplyThread("");
@@ -143,7 +139,6 @@ const ChatBox = ({
           .map((message) => message.id);
 
         if (unseenMessages.length > 0) {
-          console.log("unseen messages are gtraeter than zero");
           const updatedReadRecieptsResponse = await updateReadReciepts({
             messageIds: unseenMessages,
             userId: currentUser.id,
@@ -160,11 +155,15 @@ const ChatBox = ({
 
   //handling sent messages
   const handleSend = async (e) => {
-    const tempThreadId =uuidv4();
+    let threadId = null;
 
-    setExpandedThreadHead((prev) => {
-      return { ...prev, thread_id: tempThreadId };
-    });
+    if (replyThread === "new") {
+      threadId = uuidv4();
+
+      setExpandedThreadHead((prev) => {
+        return { ...prev, thread_id: threadId };
+      });
+    }
 
     setemojiPickerOpen(false);
 
@@ -187,14 +186,14 @@ const ChatBox = ({
       User: { username: currentUser.username },
       sender_id: currentUser.id,
       message: replyThread !== "" ? replyMessage : newMessage,
-      thread_id: tempThreadId || null,
+      thread_id:
+        replyThread === "old" ? expandedThreadHead.thread_id : threadId,
       chatId: chat.chat_id,
       chatType: chatType,
       is_thread_head: false,
     };
 
-    // send message to socket server
-    setSendMessage({ ...newMessageData, userIds });
+    //updating the messages
     setMessages((prev) => [...prev, newMessageData]);
 
     //updating currentThreadMessages if it is reply to thread
@@ -202,7 +201,10 @@ const ChatBox = ({
       setcurrentThreadMessages((prev) => [...prev, newMessageData]);
     }
 
-    // send message to database
+    // send message to socket server
+    setSendMessage({ ...newMessageData, userIds });
+
+    // send message to backend
     try {
       let newMessageResponse = null;
       if (replyThread === "")
@@ -215,15 +217,17 @@ const ChatBox = ({
           head: expandedThreadHead.id,
           userIds: [expandedThreadHead.sender_id, currentUser.id],
         });
+        //changing the temporary thread_id with new Thread_id
         setMessages((prevMessages) =>
           prevMessages.map((message) =>
-            message.thread_id === tempThreadId
+            message.thread_id === threadId
               ? { ...message, thread_id: newMessageResponse.thread_id }
               : message
           )
         );
       }
-      console.log(newMessageResponse);
+
+      //creating read reciepts
       const readRecieptResponse = await addReadReciept(
         {
           userIds: userIds,
@@ -234,7 +238,9 @@ const ChatBox = ({
         newMessageResponse.data.id
       );
 
+      //resetting all newmessages
       setNewMessage("");
+      setReplyMessage("");
     } catch (error) {
       console.log(error);
     }
@@ -242,9 +248,14 @@ const ChatBox = ({
 
   // Receive Message from parent component
   useEffect(() => {
-    if (receivedMessage !== null && receivedMessage.chatId === chat?.chat_id) {
+    console.log(receivedMessage);
+    if (receivedMessage && receivedMessage.chatId === chat?.chat_id) {
       setMessages((prev) => [...prev, receivedMessage]);
-      if (receivedMessage.thread_id)
+      if (
+        receivedMessage?.thread_id && 
+        expandedThreadHead?.thread_id && 
+        receivedMessage.thread_id === expandedThreadHead.thread_id
+      )
         setcurrentThreadMessages((prev) => [...prev, receivedMessage]);
     }
   }, [receivedMessage]);
@@ -288,7 +299,6 @@ const ChatBox = ({
                 message.is_thread_head &&
                 "border border-gray-300 shadow-lg rounded-lg cursor-pointer"
               }`}
-              
             >
               <Message
                 index={index}
@@ -301,7 +311,7 @@ const ChatBox = ({
                 messageActionIndex={messageActionIndex}
                 setmessageActionIndex={setmessageActionIndex}
                 currentThreadMessages={currentThreadMessages}
-                onClick={() => {
+                onThreadClick={() => {
                   if (message.is_thread_head) {
                     updateExpandThreadHead(message);
                     updateCurrentMessages(message);

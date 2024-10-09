@@ -6,8 +6,13 @@ import { BiMessageAltDetail } from "react-icons/bi";
 import { TfiMore } from "react-icons/tfi";
 import { useSelector } from "react-redux";
 
-
-const MessageActionModal = ({ isCurrentUser,setreplyThread, message, setMessages,setExpandedThreadHead}) => {
+const MessageActionModal = ({
+  isCurrentUser,
+  setreplyThread,
+  message,
+  setMessages,
+  setExpandedThreadHead,
+}) => {
   const [moreActions, setMoreActions] = useState(false);
   const [position, setPosition] = useState("");
   const parentRef = useRef(null);
@@ -16,23 +21,17 @@ const MessageActionModal = ({ isCurrentUser,setreplyThread, message, setMessages
 
   //converting normal message to threadhead
   const messageToThread = () => {
-    console.log('mssg to thread')
-    setExpandedThreadHead(message)
-    setreplyThread("new")
-    setMessages(prev => {
-      return prev.map(msg => {
+    setExpandedThreadHead(message);
+    setreplyThread("new");
+    setMessages((prev) => {
+      return prev.map((msg) => {
         if (msg.id === message.id) {
-          console.log(msg)
-          return { ...msg, is_thread_head: true}; 
+          return { ...msg, is_thread_head: true };
         }
-        return msg; 
+        return msg;
       });
     });
   };
-
-  
-  
-
 
   useEffect(() => {
     if (parentRef.current) {
@@ -41,13 +40,10 @@ const MessageActionModal = ({ isCurrentUser,setreplyThread, message, setMessages
       const middleScreen = screenHeight / 2;
 
       if (parentPosition.top < middleScreen / 2) {
-        console.log("below");
         setPosition("below");
       } else if (parentPosition.top < middleScreen) {
-        console.log("middle");
         setPosition("middle");
       } else {
-        console.log("above");
         setPosition("above");
       }
     }
@@ -66,10 +62,8 @@ const MessageActionModal = ({ isCurrentUser,setreplyThread, message, setMessages
         <div className="forward flex items-center justify-center w-6 h-full hover:bg-blue-100 hover:text-blue-400 cursor-pointer">
           <CgMailForward />
         </div>
-        {!message.thread_id && message.sender_id!==currentUser.id && (
-          <div
-            className="replyinthread flex items-center justify-center w-6 h-full hover:bg-blue-100 hover:text-blue-400 cursor-pointer"
-          >
+        {!message.thread_id && message.sender_id !== currentUser.id && (
+          <div className="replyinthread flex items-center justify-center w-6 h-full hover:bg-blue-100 hover:text-blue-400 cursor-pointer">
             <BiMessageAltDetail onClick={messageToThread} />
           </div>
         )}
