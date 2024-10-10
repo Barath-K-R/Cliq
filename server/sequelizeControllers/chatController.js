@@ -15,33 +15,41 @@ export const createChatSequelize = async (req, res) => {
     scope,
   } = req.body;
 
+  console.log(userIds);
   try {
+    const num_of_users = userIds.length;
+
+    //checking if the chat already exists
+    const chatExistsQuery = `
+      SELECT c.id, c.chat_type
+      FROM chats c
+      JOIN chat_members cm ON c.id = cm.chat_id
+      WHERE c.chat_type IN ('direct', 'group', 'channel')
+        AND cm.user_id IN (:tempuserIds)
+      GROUP BY c.id, c.chat_type
+      HAVING COUNT(DISTINCT cm.user_id) =:num_of_users
+        AND COUNT(DISTINCT cm.user_id) = (
+          SELECT COUNT(*)
+          FROM chat_members cm2
+          WHERE cm2.chat_id = c.id
+        )
+      LIMIT 1;
+    `;
+
+    const tempuserIds = [...userIds, currentUserId];
+    const chatExists = await sequelize.query(chatExistsQuery, {
+      replacements: { tempuserIds, num_of_users },
+      type: sequelize.QueryTypes.SELECT,
+    });
+
+    console.log("finished");
+
+    if (chatExists.length > 0)
+      res.send({ message: "chat already exits", chatExists });
+
     if (chatType === "direct") {
       console.log("DIRECT");
 
-      // Check if the direct chat already exists
-      const existingChat = await ChatModel.findOne({
-        where: {
-          chat_type: chatType,
-          id: {
-            [Op.in]: sequelize.literal(`(
-              SELECT chat_id 
-              FROM chat_members 
-              WHERE user_id = ${sequelize.escape(currentUserId)}
-            )`),
-          },
-        },
-        include: [
-          {
-            model: UserModel,
-            attributes: ["id", "username"],
-            through: { attributes: [] },
-          },
-        ],
-      });
-
-      console.log(existingChat);
-      if (!existingChat) {
         // Create new chat
         const newChat = await ChatModel.create({
           chat_type: chatType,
@@ -68,9 +76,7 @@ export const createChatSequelize = async (req, res) => {
           newChat: newChatWithMembers,
           message: "New chat created and users added.",
         });
-      } else {
-        res.send({message:"chat already exits",existingChat});
-      }
+      
     } else if (chatType === "group") {
       console.log("GROUP");
 
@@ -81,10 +87,11 @@ export const createChatSequelize = async (req, res) => {
         description,
       });
 
+      console.log(newGroup);
       // Add members to the chat
       const groupMembers = userIds.map((user) => ({
         chat_id: newGroup.id,
-        user_id: user.id,
+        user_id: user,
       }));
       groupMembers.push({ chat_id: newGroup.id, user_id: currentUserId });
 
@@ -137,11 +144,11 @@ export const createChatSequelize = async (req, res) => {
 };
 
 export const getCurrentUserChatsSequelize = async (req, res) => {
-  console.log('getting current chats')
+  console.log("getting current chats");
   try {
     const type = req.query.type;
     const { userId } = req.params;
-    console.log(type+' '+userId)
+    console.log(type + " " + userId);
     console.log(type);
     if (!type || !userId) {
       return res.status(400).send({ error: "Missing required parameters" });
@@ -151,7 +158,7 @@ export const getCurrentUserChatsSequelize = async (req, res) => {
     if (type === "direct") {
       console.log("Fetching direct chats");
 
-      chats =await ChatMembersModel.findAll({
+      chats = await ChatMembersModel.findAll({
         attributes: ["chat_id"],
         where: {
           chat_id: {
@@ -179,15 +186,20 @@ export const getCurrentUserChatsSequelize = async (req, res) => {
           },
         ],
       });
-    }
-    else{
-      chats= await ChatMembersModel.findAll({
-        attributes: ['chat_id'],
+    } else {
+      chats = await ChatMembersModel.findAll({
+        attributes: ["chat_id"],
         include: [
           {
             model: ChatModel,
-            attributes: ['name','description','visibility','scope'],
-            where: { chat_type: type }, 
+            attributes: [
+              "name",
+              "description",
+              "visibility",
+              "scope",
+              "chat_type",
+            ],
+            where: { chat_type: type },
           },
         ],
         where: {
@@ -195,7 +207,7 @@ export const getCurrentUserChatsSequelize = async (req, res) => {
         },
       });
     }
-
+    console.log(chats)
     res.send(chats);
   } catch (error) {
     console.error("Error fetching user chats:", error);
@@ -213,9 +225,9 @@ export const getChatMembersSequelize = async (req, res) => {
         {
           model: UserModel,
           attributes: ["id", "username"],
-        }
+        },
       ],
-      attributes: [ "user_id", "role", "joined_at"],
+      attributes: ["user_id", "role", "joined_at"],
     });
 
     res.send(chatMembers);

@@ -16,7 +16,7 @@ const RoleModel = sequelize.define(
   },
   {
     tableName: "roles",
-    timestamps: false, 
+    timestamps: false,
   }
 );
 

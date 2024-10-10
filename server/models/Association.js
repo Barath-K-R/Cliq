@@ -33,7 +33,7 @@ UserModel.hasMany(MessageModel, {
 });
 
 UserModel.hasMany(ReadRecieptModel, {
-   foreignKey: "user_id"
+  foreignKey: "user_id",
 });
 
 UserModel.hasMany(ThreadMembersModel, {
@@ -95,7 +95,7 @@ MessageModel.belongsTo(UserModel, {
 });
 
 MessageModel.hasMany(ReadRecieptModel, {
-  foreignKey: "message_id" 
+  foreignKey: "message_id",
 });
 
 MessageModel.belongsTo(ThreadModel, {
@@ -150,7 +150,6 @@ ThreadMembersModel.belongsTo(UserModel, {
   foreignKey: "user_id",
   onDelete: "CASCADE",
 });
-
 
 //ReadReciept Model
 ReadRecieptModel.belongsTo(UserModel, {

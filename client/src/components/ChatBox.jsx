@@ -107,7 +107,7 @@ const ChatBox = ({
 
   //checking chat is group or direct
   useEffect(() => {
-    if (chat?.Chat.name) setIsGroup(true);
+    if (chat?.Chat?.name) setIsGroup(true);
     else setIsGroup(false);
   }, [chat]);
 
@@ -188,7 +188,7 @@ const ChatBox = ({
       message: replyThread !== "" ? replyMessage : newMessage,
       thread_id:
         replyThread === "old" ? expandedThreadHead.thread_id : threadId,
-      chatId: chat.chat_id,
+      chatId: chat?.chat_id,
       chatType: chatType,
       is_thread_head: false,
     };
@@ -278,10 +278,10 @@ const ChatBox = ({
   return (
     <div className="flex flex-col relative h-screen w-full bg-slate-100 z-0">
       {/* Chat header */}
-      <div className="flex items-center h-12 border border-solid border-gray-500 shadow-2xl bg-white p-4 gap-2">
-        <div className="flex justify-center items-center w-1/6 h-10 cursor-pointer">
+      <div className="flex items-center h-12 border border-solid border-gray-500 shadow-2xl bg-white p-4 gap-6">
+        <div className="flex justify-start items-center max-w-max h-10 cursor-pointer">
           <h1 className="font-semibold text-xl ">
-            {chat?.Chat.name ? chat.Chat.name : chat?.User.username}
+            {chat?.Chat?.name ? chat.Chat?.name : chat?.User?.username}
           </h1>
         </div>
         <div className="flex justify-center items-center cursor-pointer">

@@ -43,6 +43,7 @@ const Home = () => {
     const getChats = async () => {
       try {
         const response = await userChats(user.id, chatType);
+        console.log(response.data)
         setChats(response.data);
       } catch (error) {
         console.log(error);
@@ -81,11 +82,10 @@ const Home = () => {
   //creating new chat
   const handleCreateChat = async (groupName) => {
     try {
-      console.log("Handle create chat");
-      console.log(selectedUsers);
+      const userIds=selectedUsers.map(user=>user.id)
       const data = {
         currentUserId: user.id,
-        userIds: selectedUsers,
+        userIds: userIds,
         chatType: createChatSelection,
         name: chatData.name,
         description: chatData.description,

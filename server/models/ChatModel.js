@@ -55,6 +55,8 @@ const ChatModel = sequelize.define(
   {
     tableName: "chats",
     timestamps: true,
+    createdAt: "created_at",
+    updatedAt: "updated_at",
   }
 );
 
