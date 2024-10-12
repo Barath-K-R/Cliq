@@ -43,7 +43,7 @@ const Home = () => {
     const getChats = async () => {
       try {
         const response = await userChats(user.id, chatType);
-        console.log(response.data)
+        console.log(response.data);
         setChats(response.data);
       } catch (error) {
         console.log(error);
@@ -59,7 +59,6 @@ const Home = () => {
     socket.current.on("get-users", (users) => {
       setOnlineUsers(users);
     });
-
     return () => {
       socket.current.disconnect();
     };
@@ -82,7 +81,7 @@ const Home = () => {
   //creating new chat
   const handleCreateChat = async (groupName) => {
     try {
-      const userIds=selectedUsers.map(user=>user.id)
+      const userIds = selectedUsers.map((user) => user.id);
       const data = {
         currentUserId: user.id,
         userIds: userIds,
