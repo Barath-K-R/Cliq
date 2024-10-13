@@ -49,34 +49,32 @@ export const createChatSequelize = async (req, res) => {
 
     if (chatType === "direct") {
       console.log("DIRECT");
+      // Create new chat
+      const newChat = await ChatModel.create({
+        chat_type: chatType,
+      });
 
-        // Create new chat
-        const newChat = await ChatModel.create({
-          chat_type: chatType,
-        });
+      // Add members to the chat
+      await ChatMembersModel.bulkCreate([
+        { chat_id: newChat.id, user_id: currentUserId },
+        { chat_id: newChat.id, user_id: userIds[0] },
+      ]);
 
-        // Add members to the chat
-        await ChatMembersModel.bulkCreate([
-          { chat_id: newChat.id, user_id: currentUserId },
-          { chat_id: newChat.id, user_id: userIds[0] },
-        ]);
+      const newChatWithMembers = await ChatModel.findOne({
+        where: { id: newChat.id },
+        include: [
+          {
+            model: UserModel,
+            attributes: ["id", "username"],
+            through: { attributes: [] },
+          },
+        ],
+      });
 
-        const newChatWithMembers = await ChatModel.findOne({
-          where: { id: newChat.id },
-          include: [
-            {
-              model: UserModel,
-              attributes: ["id", "username"],
-              through: { attributes: [] },
-            },
-          ],
-        });
-
-        res.send({
-          newChat: newChatWithMembers,
-          message: "New chat created and users added.",
-        });
-      
+      res.send({
+        newChat: newChatWithMembers,
+        message: "New chat created and users added.",
+      });
     } else if (chatType === "group") {
       console.log("GROUP");
 
@@ -207,7 +205,7 @@ export const getCurrentUserChatsSequelize = async (req, res) => {
         },
       });
     }
-    console.log(chats)
+    console.log(chats);
     res.send(chats);
   } catch (error) {
     console.error("Error fetching user chats:", error);
