@@ -10,7 +10,6 @@ import { io } from "socket.io-client";
 import { userChats, createChat } from "../api/ChatApi.js";
 import { useSelector } from "react-redux";
 import { AiOutlinePlus } from "react-icons/ai";
-
 import "../styles/Home.css";
 
 const Home = () => {
