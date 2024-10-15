@@ -9,7 +9,7 @@ const UserSearchModal = ({
   setselectedUsers,
   createChatSelection,
   handleCreateChat,
-  setchatData
+  setchatData,
 }) => {
   const [orgUsers, setOrgUsers] = useState(null);
   const [filteredUsers, setFilteredUsers] = useState(null);
@@ -18,14 +18,14 @@ const UserSearchModal = ({
   const user = useSelector((state) => state.user.authUser);
 
   useEffect(() => {
-    if (createChatSelection === 'direct' && selectedUsers.length==1) {
-      console.log('creating direct chat');
+    if (createChatSelection === "direct" && selectedUsers.length == 1) {
+      console.log("creating direct chat");
       handleCreateChat();
       setUserSearchModal(false);
     }
   }, [selectedUsers, createChatSelection]);
 
-  //fetching all organization users      
+  //fetching all organization users
   useEffect(() => {
     const fetchOrgUsers = async () => {
       try {
@@ -53,20 +53,18 @@ const UserSearchModal = ({
   }, [searchTerm]);
 
   const handleUserClick = (user) => {
-    
     if (selectedUsers.some((item) => item.id === user.id)) {
       // setselectedUsers user already in selectedUsers
       setselectedUsers((prev) => prev.filter((item) => item.id !== user.id));
     } else {
-      console.log('directly adding');
+      console.log("directly adding");
       // Add user to selected list
-      setselectedUsers((prev) =>{
-        console.log([...prev,user.id])
-        return [...prev, user]});
-
+      setselectedUsers((prev) => {
+        console.log([...prev, user.id]);
+        return [...prev, user];
+      });
     }
   };
-  
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
@@ -83,9 +81,9 @@ const UserSearchModal = ({
             size={24}
             className="cursor-pointer"
             onClick={() => {
-              setchatData(prev=>{
-                return {...prev,name:""}
-              })
+              setchatData((prev) => {
+                return { ...prev, name: "" };
+              });
               setUserSearchModal(false);
               setselectedUsers([]);
             }}
@@ -99,9 +97,11 @@ const UserSearchModal = ({
                 type="text"
                 placeholder="Enter the Group Name"
                 className="w-full h-full border pl-4 border-gray-300 focus:border-blue-500 focus:outline-none rounded-md"
-                onChange={(e) => setchatData(prev=>{
-                  return {...prev,name:e.target.value}
-                })}
+                onChange={(e) =>
+                  setchatData((prev) => {
+                    return { ...prev, name: e.target.value };
+                  })
+                }
               />
             </div>
           )}

@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
 import { CiUser } from "react-icons/ci";
 import { CgMailReply } from "react-icons/cg";
-import Message from "./Message.jsx";
 import EmojiPicker, { EmojiStyle } from "emoji-picker-react";
 import { BsEmojiSmile } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { v4 as uuidv4 } from "uuid";
+
+import Message from "./Message.jsx";
+import AddParticipantModal from './AddParticipantModal.jsx'
 import {
   getMessages,
   addMessage,
@@ -34,6 +36,7 @@ const ChatBox = ({
   const [expandedThreadHead, setExpandedThreadHead] = useState(null);
   const [threadMap, setThreadMap] = useState({});
   const [replyThread, setreplyThread] = useState("");
+  const [addParticipantModalOpened, setAddParticipantModalOpened] = useState(false)
 
   const messagesEndRef = useRef(null);
 
@@ -284,11 +287,14 @@ const ChatBox = ({
             {chat?.Chat?.name ? chat.Chat?.name : chat?.User?.username}
           </h1>
         </div>
-        <div className="flex justify-center items-center cursor-pointer">
+        <div className="flex justify-center items-center cursor-pointer" onClick={()=>setAddParticipantModalOpened(prev=>!prev)}>
           <CiUser size={22} />
           <span>{chatMembers.length}</span>
         </div>
       </div>
+
+      {addParticipantModalOpened && <AddParticipantModal chat={chat} setAddParticipantModalOpened={setAddParticipantModalOpened}/>}
+      
 
       {/* Scrollable message display */}
       <div className="flex-1 flex flex-col gap-2 bg-white p-2 pt-8 overflow-scroll">
