@@ -42,8 +42,7 @@ app.use(cors());
     );
 
     // Sync models
-    await sequelize.sync({ alter: false
-     });
+    await sequelize.sync({ alter: false });
     console.log("All models were synchronized successfully.");
 
     // Start the server

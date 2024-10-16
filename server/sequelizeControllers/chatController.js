@@ -1,8 +1,11 @@
 import ChatModel from "../models/ChatModel.js";
 import ChatMembersModel from "../models/ChatMembersModel.js";
 import UserModel from "../models/UserModel.js";
+import PermissionModel from "../models/PermissionModel.js";
+import RoleModel from "../models/RolesModel.js";
 import { Op } from "sequelize";
 import sequelize from "../config/sequelizeConfig.js";
+import ChatPermissionModel from "../models/ChatPermissionModel.js";
 
 export const createChatSequelize = async (req, res) => {
   const {
@@ -225,12 +228,60 @@ export const getChatMembersSequelize = async (req, res) => {
           attributes: ["id", "username"],
         },
       ],
-      attributes: ["user_id", "role", "joined_at"],
+      attributes: ["user_id", "role_id", "joined_at"],
     });
 
     res.send(chatMembers);
   } catch (err) {
     console.error("Error fetching chat members:", err);
     res.status(500).send("Couldn't retrieve the members.");
+  }
+};
+
+export const addMembersToChat = async (req, res) => {
+  const { chatId } = req.params;
+  const userIds = req.body;
+  try {
+    const chat = await ChatModel.findByPk(chatId);
+    if (!chat) {
+      res.status(404).send("chat not found");
+    }
+
+    // Validate if the users exist
+    const users = await UserModel.findAll({ where: { id: userIds } });
+    if (users.length !== userIds.length) {
+      res.status(404).send("One or more users not found");
+    }
+
+    const groupIds = userIds.map((id) => {
+      return { chat_id: chatId, user_id: id };
+    });
+    const newMembers = await ChatMembersModel.bulkCreate(groupIds);
+    res.send(newMembers);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const getRolePermissions = async (req, res) => {
+  const { chatId, roleId } = req.params;
+  console.log(chatId + " " + roleId);
+  try {
+    const response = await ChatPermissionModel.findAll({
+      where: {
+        chat_id: chatId,
+        role_id: roleId,
+      },
+      include: [
+        {
+          model: PermissionModel,
+          attributes: ["name"],
+        },
+      ],
+      attributes: ["chat_id", "role_id"],
+    });
+    res.send(response);
+  } catch (error) {
+    console.log(error);
   }
 };

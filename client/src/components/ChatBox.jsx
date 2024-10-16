@@ -5,9 +5,12 @@ import EmojiPicker, { EmojiStyle } from "emoji-picker-react";
 import { BsEmojiSmile } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { v4 as uuidv4 } from "uuid";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 import Message from "./Message.jsx";
-import AddParticipantModal from './AddParticipantModal.jsx'
+import AddParticipantModal from "./AddParticipantModal.jsx";
 import {
   getMessages,
   addMessage,
@@ -16,6 +19,7 @@ import {
   updateReadReciepts,
   addMessageToThread,
   createThread,
+  getRolePermissions,
 } from "../api/ChatApi";
 const ChatBox = ({
   chat,
@@ -36,7 +40,9 @@ const ChatBox = ({
   const [expandedThreadHead, setExpandedThreadHead] = useState(null);
   const [threadMap, setThreadMap] = useState({});
   const [replyThread, setreplyThread] = useState("");
-  const [addParticipantModalOpened, setAddParticipantModalOpened] = useState(false)
+  const [addParticipantModalOpened, setAddParticipantModalOpened] =
+    useState(false);
+  const [userPermissions, setUserPermissions] = useState([]);
 
   const messagesEndRef = useRef(null);
 
@@ -108,23 +114,22 @@ const ChatBox = ({
     buildThreadMap();
   }, [messages]);
 
-  //checking chat is group or direct
+  //checking chat is group or direct,fetching messages,fetching chat Members,fetching role permissions
   useEffect(() => {
-    if (chat?.Chat?.name) setIsGroup(true);
-    else setIsGroup(false);
-  }, [chat]);
-
-  //fetch group memebers
-  useEffect(() => {
-    const getChatMembers = async () => {
-      const response = await retrieveMembers(chat?.chat_id);
-      setchatMembers(response.data);
+    const checkIfGroup = () => {
+      if (chat?.Chat?.name) setIsGroup(true);
+      else setIsGroup(false);
     };
-    getChatMembers();
-  }, [chat]);
 
-  // fetch messages
-  useEffect(() => {
+    const getChatMembers = async () => {
+      try {
+        const response = await retrieveMembers(chat?.chat_id);
+        setchatMembers(response.data);
+      } catch (error) {
+        console.log("Error fetching chat members:", error);
+      }
+    };
+
     const fetchMessages = async () => {
       try {
         const { data } = await getMessages(chat?.chat_id);
@@ -153,11 +158,46 @@ const ChatBox = ({
       }
     };
 
-    if (chat !== null) fetchMessages();
+    const fetchRolePermissions = async () => {
+      console.log("permissions");
+      console.log(chatMembers);
+      try {
+        const currentUserDetails = chatMembers.find(
+          (member) => member.user_id === currentUser.id
+        );
+        console.log(chat.chat_id + " " + currentUserDetails.role_id);
+        const response = await getRolePermissions(
+          chat.chat_id,
+          currentUserDetails.role_id
+        );
+        console.log(response.data);
+        setUserPermissions(response.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    if (chat !== null) {
+      checkIfGroup();
+      getChatMembers();
+      fetchMessages();
+      fetchRolePermissions();
+    }
   }, [chat]);
 
   //handling sent messages
   const handleSend = async (e) => {
+    const hasSendMessagePermission = userPermissions.some(
+      (permission) => permission.Permission.name === "send message"
+    );
+
+    if (!hasSendMessagePermission) {
+      toast.error("You do not have permission to send a message!", {
+        position: "top-right",
+       
+      });
+      return;
+    }
+
     let threadId = null;
 
     if (replyThread === "new") {
@@ -255,8 +295,8 @@ const ChatBox = ({
     if (receivedMessage && receivedMessage.chatId === chat?.chat_id) {
       setMessages((prev) => [...prev, receivedMessage]);
       if (
-        receivedMessage?.thread_id && 
-        expandedThreadHead?.thread_id && 
+        receivedMessage?.thread_id &&
+        expandedThreadHead?.thread_id &&
         receivedMessage.thread_id === expandedThreadHead.thread_id
       )
         setcurrentThreadMessages((prev) => [...prev, receivedMessage]);
@@ -287,14 +327,22 @@ const ChatBox = ({
             {chat?.Chat?.name ? chat.Chat?.name : chat?.User?.username}
           </h1>
         </div>
-        <div className="flex justify-center items-center cursor-pointer" onClick={()=>setAddParticipantModalOpened(prev=>!prev)}>
+        <div
+          className="flex justify-center items-center cursor-pointer"
+          onClick={() => setAddParticipantModalOpened((prev) => !prev)}
+        >
           <CiUser size={22} />
           <span>{chatMembers.length}</span>
         </div>
       </div>
 
-      {addParticipantModalOpened && <AddParticipantModal chat={chat} setAddParticipantModalOpened={setAddParticipantModalOpened}/>}
-      
+      {addParticipantModalOpened && (
+        <AddParticipantModal
+          chat={chat}
+          setAddParticipantModalOpened={setAddParticipantModalOpened}
+          userPermissions={userPermissions}
+        />
+      )}
 
       {/* Scrollable message display */}
       <div className="flex-1 flex flex-col gap-2 bg-white p-2 pt-8 overflow-scroll">

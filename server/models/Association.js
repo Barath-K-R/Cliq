@@ -52,10 +52,6 @@ ChatModel.hasMany(MessageModel, {
   foreignKey: "chat_id",
 });
 
-ChatModel.hasMany(ChatPermissionModel, {
-  foreignKey: "chat_id",
-});
-
 ChatModel.hasMany(ChatMembersModel, {
   foreignKey: "chat_id",
 });
@@ -107,19 +103,6 @@ OrganizationModel.hasMany(UserModel, {
 });
 
 //permissionmodel associations
-PermissionModel.hasMany(ChatPermissionModel, {
-  foreignKey: "permission_id",
-});
-
-ChatPermissionModel.belongsTo(PermissionModel, {
-  foreignKey: "permission_id",
-  onDelete: "CASCADE",
-});
-
-ChatPermissionModel.belongsTo(ChatModel, {
-  foreignKey: "chat_id",
-  onDelete: "CASCADE",
-});
 
 //rolemodel associations
 RolesModel.hasMany(ChatMembersModel, {
@@ -158,4 +141,33 @@ ReadRecieptModel.belongsTo(UserModel, {
 
 ReadRecieptModel.belongsTo(MessageModel, {
   foreignKey: "id",
+});
+
+//association between role and chat Permission
+RolesModel.hasMany(ChatPermissionModel, {
+  foreignKey: "role_id",
+});
+
+ChatPermissionModel.belongsTo(RolesModel, {
+  foreignKey: "role_id",
+});
+
+//association between permission and chat Permission
+PermissionModel.hasMany(ChatPermissionModel, {
+  foreignKey: "permission_id",
+});
+
+ChatPermissionModel.belongsTo(PermissionModel, {
+  foreignKey: "permission_id",
+  onDelete: "CASCADE",
+});
+
+// Associations between Chat and ChatPermission
+ChatPermissionModel.belongsTo(ChatModel, {
+  foreignKey: "chat_id",
+  onDelete: "CASCADE",
+});
+
+ChatModel.hasMany(ChatPermissionModel, {
+  foreignKey: "chat_id",
 });

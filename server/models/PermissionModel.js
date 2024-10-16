@@ -9,7 +9,7 @@ const PermissionModel = sequelize.define(
       primaryKey: true,
       autoIncrement: true,
     },
-    permission_name: {
+    name: {
       type: DataTypes.STRING(70),
       allowNull: false,
     },
