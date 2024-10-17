@@ -263,6 +263,39 @@ export const addMembersToChat = async (req, res) => {
   }
 };
 
+export const removeMembersFromChat = async (req, res) => {
+  const { chatId } = req.params;
+  const { userIds } = req.body;
+  console.log(userIds);
+  try {
+    const chat = await ChatModel.findByPk(chatId);
+    if (!chat) {
+      res.status(404).send("chat not found");
+    }
+
+    // Validate if the users exist
+    const users = await UserModel.findAll({ where: { id: userIds } });
+    if (users.length !== userIds.length) {
+      res.status(404).send("One or more users not found");
+    }
+
+    const groupIds = userIds.map((id) => {
+      return { chat_id: chatId, user_id: id };
+    });
+    const removedMembers = await ChatMembersModel.destroy({
+      where: {
+        [Op.or]: groupIds,
+      },
+    });
+
+    res.send({
+      removedMembers,
+      message: "users were removed successfully from the chat",
+    });
+  } catch (error) {
+    console.error(error);
+  }
+};
 export const getRolePermissions = async (req, res) => {
   const { chatId, roleId } = req.params;
   console.log(chatId + " " + roleId);

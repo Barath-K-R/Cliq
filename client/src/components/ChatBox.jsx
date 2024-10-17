@@ -8,9 +8,8 @@ import { v4 as uuidv4 } from "uuid";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-
 import Message from "./Message.jsx";
-import AddParticipantModal from "./AddParticipantModal.jsx";
+import MembersList from "./MembersList.jsx";
 import {
   getMessages,
   addMessage,
@@ -40,8 +39,7 @@ const ChatBox = ({
   const [expandedThreadHead, setExpandedThreadHead] = useState(null);
   const [threadMap, setThreadMap] = useState({});
   const [replyThread, setreplyThread] = useState("");
-  const [addParticipantModalOpened, setAddParticipantModalOpened] =
-    useState(false);
+  const [membersListModalOpened, setmembersListModalOpened] = useState(false);
   const [userPermissions, setUserPermissions] = useState([]);
 
   const messagesEndRef = useRef(null);
@@ -193,7 +191,6 @@ const ChatBox = ({
     if (!hasSendMessagePermission) {
       toast.error("You do not have permission to send a message!", {
         position: "top-right",
-       
       });
       return;
     }
@@ -329,17 +326,18 @@ const ChatBox = ({
         </div>
         <div
           className="flex justify-center items-center cursor-pointer"
-          onClick={() => setAddParticipantModalOpened((prev) => !prev)}
+          onClick={() => setmembersListModalOpened((prev) => !prev)}
         >
           <CiUser size={22} />
           <span>{chatMembers.length}</span>
         </div>
       </div>
 
-      {addParticipantModalOpened && (
-        <AddParticipantModal
+      {membersListModalOpened && (
+        <MembersList
           chat={chat}
-          setAddParticipantModalOpened={setAddParticipantModalOpened}
+          chatMembers={chatMembers}
+          setmembersListModalOpened={setmembersListModalOpened}
           userPermissions={userPermissions}
         />
       )}
