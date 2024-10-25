@@ -32,6 +32,7 @@ const Auth = () => {
         console.log(error);
     }
   };
+
   return (
     <div className="flex items-start justify-center pt-14 w-full bg-gray-100">
       <div className="flex flex-col gap-4 h-5/6 w-2/6 bg-orange-400">

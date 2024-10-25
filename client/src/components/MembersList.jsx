@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 
-import { addMembersToChat } from "../api/ChatApi.js";
+import { addMembersToChat, removeMembersFromChat } from "../api/ChatApi.js";
 import { getAllOrgUser } from "../api/UserApi.js";
 import AddMemberModal from "./AddMemberModal.jsx";
 import { AiFillCloseCircle } from "react-icons/ai";
 import { AiOutlineSearch } from "react-icons/ai";
+import { BsThreeDotsVertical } from "react-icons/bs";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -14,13 +15,14 @@ const MembersList = ({
   setmembersListModalOpened,
   userPermissions,
   chatMembers,
+  setchatMembers,
 }) => {
   const [filteredMembers, setfilteredMembers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [orgUsers, setOrgUsers] = useState(null);
   const [selectedUsers, setselectedUsers] = useState([]);
-  const [selectedMembers, setselectedMembers] = useState([]);
+  const [selectedMembers, setSelectedMembers] = useState([]);
   const [addMember, setaddMember] = useState(false);
   const currentUser = useSelector((state) => state.user.authUser);
 
@@ -39,22 +41,17 @@ const MembersList = ({
     }
   };
 
-  const handleMemberClick = (member) => {
-    if (selectedMembers.some((item) => item.user_id === member.user_id)) {
-      // setselectedUsers user already in selectedUsers
-      setselectedMembers((prev) =>
+  //handling member selection
+  const handleMemberCick = (member) => {
+    console.log(member);
+    if (selectedMembers.some((item) => item.user_id === member.user_id))
+      setSelectedMembers((prev) =>
         prev.filter((item) => item.user_id !== member.user_id)
       );
-    } else {
-      console.log("directly adding");
-      // Add user to selected list
-      setselectedMembers((prev) => {
-        console.log([...prev, member.user_id]);
-        return [...prev, member];
-      });
-    }
+    else setSelectedMembers((prev) => [...prev, member]);
   };
-  //filtering user based on user selection
+
+  //filtering user and members based on user search input
   useEffect(() => {
     const filterUser = () => {
       setFilteredUsers(
@@ -101,13 +98,55 @@ const MembersList = ({
     try {
       const userIds = selectedUsers.map((user) => user.id);
       const chatMembers = await addMembersToChat(chat.chat_id, userIds);
-      console.log(chatMembers);
-    } catch (error) {}
+      if (chatMembers) {
+        toast.success("members were added successfully", {
+          position: "top-right",
+        });
+        reset();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  //handling remove participants
+  const handleRemoveParticipants = async () => {
+    const removeParticipantPermission = userPermissions.find(
+      (permission) => permission.Permission.name === "remove participants"
+    );
+
+    if (!removeParticipantPermission) {
+      toast.error("You do not have permission to add a participant!", {
+        position: "top-right",
+      });
+      return;
+    }
+
+    try {
+      console.log(selectedMembers);
+      const userIds = selectedMembers?.map((member) => member?.user_id);
+      console.log(userIds);
+      const chatMembers = await removeMembersFromChat(chat.chat_id, userIds);
+      if (chatMembers) {
+        toast.success("members were removed successfully", {
+          position: "top-right",
+        });
+        setchatMembers((prev) =>
+          prev.filter((member) => {
+            if(!userIds.includes(member.user_id))
+              return member;
+          })
+        );
+        reset();
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const reset = () => {
-    setselectedMembers([]);
     setselectedUsers([]);
+    setSelectedMembers([]);
   };
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 ">
@@ -148,7 +187,7 @@ const MembersList = ({
           />
         </div>
 
-        {/* add members list */}
+        {/* add users list */}
         {addMember && (
           <div
             className={`flex w-5/6 h-3/6 flex-col gap-4 overflow-y-scroll`}
@@ -156,15 +195,17 @@ const MembersList = ({
           >
             {filteredUsers &&
               filteredUsers.map((user) => {
-                const isSelected = selectedUsers.some(
-                  (selectedUser) => selectedUser.id === user.id
+                if (!user) return null;
+
+                const isSelected = selectedUsers?.some(
+                  (selectedUser) => selectedUser?.id === user?.id
                 );
 
                 return (
                   <div
                     key={user.id}
                     className={`flex items-center w-full h-14 ${
-                      isSelected ? "bg-blue-100" : "bg-white"
+                      isSelected ? "bg-blue-200" : "bg-white"
                     } gap-2 pl-4 rounded-md cursor-pointer hover:bg-gray-100`}
                     onClick={() => handleUserClick(user)}
                   >
@@ -181,6 +222,7 @@ const MembersList = ({
           </div>
         )}
 
+        {/* Add Participant Button */}
         <div className="flex justify-center w-full p-4 rounded-b-lg">
           <button
             className="w-36 h-10 bg-blue-500 hover:bg-opacity-75 rounded"
@@ -204,29 +246,42 @@ const MembersList = ({
           >
             {filteredMembers &&
               filteredMembers.map((member) => {
-                const isSelected = selectedMembers.some(
-                  (selectedUser) => selectedUser.user_id === member.user_id
+                const isSelected = selectedMembers?.some(
+                  (selectedUser) => selectedUser?.user_id === member?.user_id
                 );
 
                 return (
                   <div
-                    key={member.user_id}
-                    className={`flex items-center w-full h-14 ${
-                      isSelected ? "bg-blue-100" : "bg-white"
-                    } gap-2 pl-4 rounded-md cursor-pointer hover:bg-gray-100`}
-                    onClick={() => handleMemberClick(member)}
+                    key={member?.user_id}
+                    className={`flex items-center justify-between w-full h-14 
+                      ${isSelected ? "bg-blue-200" : "bg-white"}
+                     gap-2 px-4 rounded-md cursor-pointer hover:bg-gray-100`}
+                    onClick={() => handleMemberCick(member)}
                   >
-                    <div className="flex w-10 h-10 rounded-3xl text-2xl justify-center items-center bg-gray-300">
-                      {member.User.username.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="flex flex-col">
-                      <span>{member.User.username}</span>
+                    <section className="flex items-center gap-4">
+                      <div className="flex w-10 h-10 rounded-3xl text-2xl justify-center items-center bg-gray-300">
+                        {member?.User?.username.charAt(0).toUpperCase()}
+                      </div>
+                      <span>{member?.User?.username}</span>
+                    </section>
+                    <div className="box flex items-center justify-center w-6 h-6 bg-white rounded-md hover:border hover:border-gray-300">
+                      <BsThreeDotsVertical className="cursor-pointer" />
                     </div>
                   </div>
                 );
               })}
           </div>
         )}
+
+        {/* Remove button */}
+        <div className="remove pb-4">
+          <button
+            className="w-20 h-8 bg-blue-500 hover:bg-opacity-75 rounded-sm"
+            onClick={handleRemoveParticipants}
+          >
+            remove
+          </button>
+        </div>
       </div>
     </div>
   );

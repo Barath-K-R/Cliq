@@ -3,6 +3,7 @@ import { CiUser } from "react-icons/ci";
 import { CgMailReply } from "react-icons/cg";
 import EmojiPicker, { EmojiStyle } from "emoji-picker-react";
 import { BsEmojiSmile } from "react-icons/bs";
+import { BsThreeDotsVertical } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { v4 as uuidv4 } from "uuid";
 import { toast } from "react-toastify";
@@ -10,6 +11,9 @@ import "react-toastify/dist/ReactToastify.css";
 
 import Message from "./Message.jsx";
 import MembersList from "./MembersList.jsx";
+import ChatSettings from "./ChatSettings.jsx";
+import ChatInfo from "./ChatInfo.jsx";
+
 import {
   getMessages,
   addMessage,
@@ -28,7 +32,6 @@ const ChatBox = ({
   onlineUsers,
 }) => {
   const [isGroup, setIsGroup] = useState(false);
-  const [chosenEmoji, setChosenEmoji] = useState(null);
   const [emojiPickerOpen, setemojiPickerOpen] = useState(false);
   const [chatMembers, setchatMembers] = useState([]);
   const [messages, setMessages] = useState([]);
@@ -40,7 +43,10 @@ const ChatBox = ({
   const [threadMap, setThreadMap] = useState({});
   const [replyThread, setreplyThread] = useState("");
   const [membersListModalOpened, setmembersListModalOpened] = useState(false);
+  const [chatSettingsOpened, setchatSettingsOpened] = useState(false);
   const [userPermissions, setUserPermissions] = useState([]);
+  const [currentUserChatDetails, setcurrentUserChatDetails] = useState(null);
+  const [chatInfoModalOpened, setchatInfoModalOpened] = useState(true);
 
   const messagesEndRef = useRef(null);
 
@@ -156,6 +162,15 @@ const ChatBox = ({
       }
     };
 
+    if (chat !== null) {
+      checkIfGroup();
+      getChatMembers();
+      fetchMessages();
+    }
+  }, [chat]);
+
+  //fetching rolepermissions
+  useEffect(() => {
     const fetchRolePermissions = async () => {
       console.log("permissions");
       console.log(chatMembers);
@@ -174,19 +189,22 @@ const ChatBox = ({
         console.log(error);
       }
     };
-    if (chat !== null) {
-      checkIfGroup();
-      getChatMembers();
-      fetchMessages();
-      fetchRolePermissions();
-    }
-  }, [chat]);
+    chatMembers.forEach((member) => {
+      if (member.user_id === currentUser.id) setcurrentUserChatDetails(member);
+    });
+    fetchRolePermissions();
+  }, [chatMembers]);
 
   //handling sent messages
   const handleSend = async (e) => {
-    const hasSendMessagePermission = userPermissions.some(
-      (permission) => permission.Permission.name === "send message"
-    );
+    let hasSendMessagePermission = null;
+    if (currentUserChatDetails.Role.name === "admin") {
+      hasSendMessagePermission = true;
+    } else {
+      hasSendMessagePermission = userPermissions.some(
+        (permission) => permission.Permission.name === "send message"
+      );
+    }
 
     if (!hasSendMessagePermission) {
       toast.error("You do not have permission to send a message!", {
@@ -318,25 +336,46 @@ const ChatBox = ({
   return (
     <div className="flex flex-col relative h-screen w-full bg-slate-100 z-0">
       {/* Chat header */}
-      <div className="flex items-center h-12 border border-solid border-gray-500 shadow-2xl bg-white p-4 gap-6">
-        <div className="flex justify-start items-center max-w-max h-10 cursor-pointer">
-          <h1 className="font-semibold text-xl ">
-            {chat?.Chat?.name ? chat.Chat?.name : chat?.User?.username}
-          </h1>
-        </div>
+      <div className="flex relative items-center justify-between h-12 border border-solid border-gray-500 shadow-sm bg-white p-4 px-6 gap-6">
+        <section className="flex items-center gap-6">
+          <div className="flex justify-start items-center max-w-max h-10 cursor-pointer">
+            <h1 className="font-semibold text-xl ">
+              {chat?.Chat?.name ? chat.Chat?.name : chat?.User?.username}
+            </h1>
+          </div>
+          <div
+            className="flex justify-center items-center cursor-pointer"
+            onClick={() => setmembersListModalOpened((prev) => !prev)}
+          >
+            <CiUser size={22} />
+            <span>{chatMembers.length}</span>
+          </div>
+        </section>
+
         <div
-          className="flex justify-center items-center cursor-pointer"
-          onClick={() => setmembersListModalOpened((prev) => !prev)}
+          className="dots flex justify-center items-center w-6 h-6  hover:bg-gray-100 rounded-xl"
+          onClick={() => setchatSettingsOpened((prev) => !prev)}
         >
-          <CiUser size={22} />
-          <span>{chatMembers.length}</span>
+          <BsThreeDotsVertical className="cursor-pointer" />
         </div>
+        {chatSettingsOpened && (
+          <ChatSettings
+            chat={chat}
+            setMessages={setMessages}
+            setchatSettingsOpened={setchatSettingsOpened}
+          />
+        )}
       </div>
 
+      {/* chat info */}
+      {chatInfoModalOpened && <ChatInfo currentChat={chat}/>}
+
+      {/* members list */}
       {membersListModalOpened && (
         <MembersList
           chat={chat}
           chatMembers={chatMembers}
+          setchatMembers={setchatMembers}
           setmembersListModalOpened={setmembersListModalOpened}
           userPermissions={userPermissions}
         />

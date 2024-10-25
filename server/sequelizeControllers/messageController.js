@@ -143,3 +143,25 @@ export const getUnseenMessagesCount = async (req, res) => {
     });
   }
 };
+
+export const deleteChatMessages = async (req, res) => {
+  console.log('deleting chat messages')
+  const { chatId } = req.params;  
+
+  try {
+
+    const deletedResponse = await MessageModel.destroy({
+      where: { chat_id: chatId },
+    });
+
+    if (deletedResponse) {
+      res.status(200).send({ message: "All messages deleted successfully." });
+    } else {
+      res.status(404).send({ message: "No messages found for this chat." });
+    }
+  } catch (error) {
+    console.error("Error deleting messages:", error);
+    res.status(500).send({ message: "Failed to delete messages." });
+  }
+};
+

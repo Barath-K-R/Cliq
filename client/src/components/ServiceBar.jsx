@@ -2,6 +2,7 @@ import React from "react";
 import { BsChatLeftTextFill } from "react-icons/bs";
 import { BsChatRightQuoteFill } from "react-icons/bs";
 import { BsCollectionFill } from "react-icons/bs";
+import { TiGroup } from "react-icons/ti";
 import { useDispatch } from "react-redux";
 
 const ServiceBar = () => {
@@ -18,7 +19,7 @@ const ServiceBar = () => {
         <span className="text-xs">Group</span>
       </div>
       <div className="flex flex-col items-center cursor-pointer" onClick={()=>dispatch({type:'ADD_SELECTION',payload:'channel'})}>
-        <BsCollectionFill size={24}/>
+        <TiGroup size={24}/>
         <span className="text-xs">Channels</span>
       </div>
     </div>
