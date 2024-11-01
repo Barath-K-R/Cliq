@@ -1,4 +1,7 @@
 import UserModel from "../models/UserModel.js";
+import RefreshTokenModel from "../models/RefreshTokenModel.js";
+
+import jwt from "jsonwebtoken";
 
 export const addingUserSequelize = async (req, res) => {
   const { username, email, password } = req.body;
@@ -13,16 +16,14 @@ export const addingUserSequelize = async (req, res) => {
     res.status(200).json(newUser);
   } catch (error) {
     console.error("Error inserting user:", error);
-    res
-      .status(500)
-      .json({
-        message: "An error occurred while adding the user.",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "An error occurred while adding the user.",
+      error: error.message,
+    });
   }
 };
 
-export const logingUserSequelize = async (req, res) => {
+export const loginUserSequelize = async (req, res) => {
   const { username, password } = req.body;
 
   try {
@@ -37,18 +38,34 @@ export const logingUserSequelize = async (req, res) => {
     const isMatch = user.password === password ? true : false;
 
     if (isMatch) {
-      return res.status(200).json(user);
+      const accessToken = generateAccessToken(user);
+      const refreshToken = generateRefreshToken(user);
+      return res.status(200).json({ user, accessToken, refreshToken });
     } else {
-      return res.status(401).send("Password not matched");
+      return res.status(401).json("Password not matched");
     }
   } catch (error) {
     console.error("Error logging in user:", error);
-    res
-      .status(500)
-      .json({
-        message: "An error occurred while logging in.",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "An error occurred while logging in.",
+      error: error.message,
+    });
+  }
+};
+
+export const logout = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    await RefreshTokenModel.destroy({
+      where: {
+        user_id: userId,
+      },
+    });
+    return res
+      .status(200)
+      .json({ message: "Successfully logged out" });
+  } catch (error) {
+    return res.status(500).json({ message: "Internal server error." });
   }
 };
 

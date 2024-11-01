@@ -13,6 +13,10 @@ const Auth = () => {
       dispatch({type:'ADD_USER',payload:user})
   }
 
+  const dispatchTokens=(tokens)=>{
+    dispatch({type:'SET_TOKENS',payload:tokens})
+  }
+
   const handleChange = (e) => {
     setFormData((prev) => {
       return { ...prev, [e.target.name]: e.target.value };
@@ -21,12 +25,16 @@ const Auth = () => {
 
   //subitting 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
       const response = await loginUser(formData);
       console.log(response.data);
-      setUser(response.data);
-      dispatchUser(response.data)
+      dispatch({type:'ADD_USER',payload:response.data.user});
+      dispatchUser(response.data.user);
+      dispatchTokens({
+        accessToken:response.data.accessToken,
+        refreshToken:response.data.refreshToken
+      });
       navigate('/');
     } catch (error) {
         console.log(error);

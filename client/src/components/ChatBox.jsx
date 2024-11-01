@@ -46,7 +46,7 @@ const ChatBox = ({
   const [chatSettingsOpened, setchatSettingsOpened] = useState(false);
   const [userPermissions, setUserPermissions] = useState([]);
   const [currentUserChatDetails, setcurrentUserChatDetails] = useState(null);
-  const [chatInfoModalOpened, setchatInfoModalOpened] = useState(true);
+  const [chatInfoModalOpened, setchatInfoModalOpened] = useState(false);
 
   const messagesEndRef = useRef(null);
 
@@ -368,7 +368,7 @@ const ChatBox = ({
       </div>
 
       {/* chat info */}
-      {chatInfoModalOpened && <ChatInfo currentChat={chat}/>}
+      {chatInfoModalOpened && <ChatInfo currentChat={chat} setchatInfoModalOpened={setchatInfoModalOpened}/>}
 
       {/* members list */}
       {membersListModalOpened && (
