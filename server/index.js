@@ -15,6 +15,7 @@ import PermissionModel from "./models/PermissionModel.js";
 import RoleModel from "./models/RolesModel.js";
 import ChatPermissionModel from "./models/ChatPermissionModel.js";
 import OrganizationModel from "./models/OrganizationModel.js";
+import RefreshTokenModel from "./models/RefreshTokenModel.js";
 
 import "./models/Association.js";
 
@@ -23,6 +24,7 @@ import UserRouter from "./routes/UserRoutes.js";
 import messageRouter from "./routes/MessageRoutes.js";
 import orgRouter from "./routes/OrganizationRoutes.js";
 import ThreadRouter from "./routes/ThreadRoutes.js";
+import AuthRouter from "./routes/AuthRoutes.js";
 
 dotenv.config();
 
@@ -61,3 +63,4 @@ app.use("/messages", messageRouter);
 app.use("/user", UserRouter);
 app.use("/org", orgRouter);
 app.use("/threads", ThreadRouter);
+app.use("/auth",AuthRouter);

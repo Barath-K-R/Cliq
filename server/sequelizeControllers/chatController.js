@@ -228,9 +228,9 @@ export const getChatMembersSequelize = async (req, res) => {
           attributes: ["id", "username"],
         },
         {
-          model:RoleModel,
-          attributes:["name"],
-        }
+          model: RoleModel,
+          attributes: ["name"],
+        },
       ],
       attributes: ["user_id", "role_id", "joined_at"],
     });
@@ -270,7 +270,7 @@ export const addMembersToChat = async (req, res) => {
 export const removeMembersFromChat = async (req, res) => {
   const { chatId } = req.params;
   const { userIds } = req.body;
-  console.log(userIds)
+  console.log(userIds);
   try {
     const chat = await ChatModel.findByPk(chatId);
     if (!chat) {

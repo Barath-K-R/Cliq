@@ -1,4 +1,5 @@
 import express from "express";
+import verifyToken from "../middleware/verifyToken.js";
 import {
   addingUser,
   logingUser,
@@ -6,12 +7,11 @@ import {
   getAllOrgusers,
 } from "../mysqlControllers/userController.js";
 
-import { addingUserSequelize,logingUserSequelize,gettingUserSequelize,getAllOrgUsersSequelize} from "../sequelizeControllers/userController.js";
+import { addingUserSequelize,gettingUserSequelize,getAllOrgUsersSequelize} from "../sequelizeControllers/userController.js";
 const UserRouter = express.Router();
 
-UserRouter.post("/", addingUserSequelize);
-UserRouter.get("/:id", gettingUserSequelize);
-UserRouter.post("/login", logingUserSequelize);
-UserRouter.get("/org/:orgId", getAllOrgUsersSequelize);
+UserRouter.post("/", verifyToken,addingUserSequelize);
+UserRouter.get("/:id",verifyToken, gettingUserSequelize);
+UserRouter.get("/org/:orgId",verifyToken, getAllOrgUsersSequelize);
 
 export default UserRouter;

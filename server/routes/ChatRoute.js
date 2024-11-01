@@ -1,13 +1,14 @@
 import express from "express";
+import verifyToken from '../middleware/verifyToken.js'
 import {createChatSequelize,getCurrentUserChatsSequelize,removeMembersFromChat,getChatMembersSequelize,getRolePermissions,addMembersToChat } from '../sequelizeControllers/chatController.js'
 const chatRouter = express.Router();
 
-chatRouter.post("/", createChatSequelize);
-chatRouter.get("/:userId", getCurrentUserChatsSequelize);
-chatRouter.get("/:chatId/members", getChatMembersSequelize);
-chatRouter.post("/:chatId/members",addMembersToChat );
-chatRouter.delete("/:chatId/members",removeMembersFromChat);
+chatRouter.post("/",verifyToken, createChatSequelize);
+chatRouter.get("/:userId",verifyToken, getCurrentUserChatsSequelize);
+chatRouter.get("/:chatId/members", verifyToken,getChatMembersSequelize);
+chatRouter.post("/:chatId/members",verifyToken,addMembersToChat );
+chatRouter.delete("/:chatId/members",verifyToken,removeMembersFromChat);
 
-chatRouter.get('/:chatId/permissions/:roleId',getRolePermissions);
+chatRouter.get('/:chatId/permissions/:roleId',verifyToken,getRolePermissions);
 
 export default chatRouter;

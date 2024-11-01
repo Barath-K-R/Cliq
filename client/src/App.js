@@ -5,9 +5,10 @@ import ServiceBar from "./components/ServiceBar";
 import Auth from "./pages/Auth";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ToastContainer } from "react-toastify";
-
+import { useSelector } from "react-redux";
 function App() {
-  const { user } = useAuth();
+  const user=useSelector(state=>state.user.authUser)
+  console.log(user)
   return (
     <>
       <Navbar />
