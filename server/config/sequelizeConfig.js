@@ -1,7 +1,7 @@
 import { Sequelize } from 'sequelize';
 
 // Creating a new instance of Sequelize
-const sequelize = new Sequelize('cliq2', 'root', '9659223637', {
+const sequelize = new Sequelize('cliq2', 'root', 'Barath@1974', {
   host: 'localhost', 
   dialect: 'mysql', 
   logging: false, 

@@ -24,7 +24,7 @@ const  Conversations = ({ chat,currentChat, setCurrentChat, onlineUsers,currentU
   useEffect(() => {
      const getunseenMessageCount=async()=>{
         try {
-          const unseenCountResponse=await unseenMessageCount(chat.chat_id,currentUser.id);
+          const unseenCountResponse=await unseenMessageCount(chat?.chat_id,currentUser.id);
           
           setunssenMessagesCount(unseenCountResponse.data.unseenReadReceipts)
         } catch (error) {
@@ -40,17 +40,17 @@ const  Conversations = ({ chat,currentChat, setCurrentChat, onlineUsers,currentU
       className="relative flex items-center justify-start bg-black bg-opacity-10 hover:bg-opacity-20 pl-4 gap-4 h-10 w-11/12 cursor-pointer rounded-lg"
       onClick={() => setCurrentChat(chat)}
     >
-      {useronline && chat.Chat?.chat_type === "direct" && (
+      {useronline && chat?.Chat?.chat_type === "direct" && (
         <div className="absolute h-[12px] w-[12px] bg-green-400 left-8 bottom-6 rounded-2xl"></div>
       )}
-      {chat.Chat?.chat_type === "direct" && (
+      {chat?.Chat?.chat_type === "direct" && (
         <div className="w-6 h-6 text-center bg-white rounded-xl">
           {chat?.User?.username.charAt(0).toUpperCase()}
         </div>
       )}
-      {chat.Chat?.chat_type !== "direct" && <BiGroup size={24} />}
+      {chat?.Chat?.chat_type !== "direct" && <BiGroup size={24} />}
       <span className="text-white">
-        {chat.Chat?.name ? chat.Chat?.name : chat?.User?.username}
+        {chat?.Chat?.name ? chat?.Chat?.name : chat?.User?.username}
       </span>
       <span className="text-green-200">{unssenMessagesCount>0 && unssenMessagesCount}</span>
     </div>

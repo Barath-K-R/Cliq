@@ -71,6 +71,7 @@ chatApi.interceptors.response.use(
 );
 
 export const createChat = (chatData) => chatApi.post("/chat", chatData);
+export const deleteChat=(chatId)=>chatApi.delete(`/chat/${chatId}`)
 export const userChats = (id, chatType) =>
   chatApi.get(`/chat/${id}?type=${chatType}`);
 export const retrieveMembers = (chatId) =>
@@ -83,15 +84,17 @@ export const removeMembersFromChat = (chatId, userIds) =>
     data: { userIds },
   });
 
+export const addRolePermissions=(chatId,permissions)=>chatApi.post(`/chat/${chatId}/permissions`,permissions)
+export const getAllRolePermissions=(chatId)=>chatApi.get(`/chat/${chatId}/permissions`);
 export const getRolePermissions = (chatId, roleId) =>
   chatApi.get(`/chat/${chatId}/permissions/${roleId}`);
+
 
 export const addMessage = (message) => chatApi.post("/messages", message);
 export const getMessages = (id) => chatApi.get(`/messages/chats/${id}`);
 export const unseenMessageCount = (chatId, userId) =>
   chatApi.get(`/messages/chats/${chatId}/unseen?userId=${userId}`);
-export const deleteMessages = (chatId) =>
-  chatApi.delete(`/messages/chats/${chatId}`);
+export const deleteMessages=(chatId)=>chatApi.delete(`/messages/chats/${chatId}`);
 
 export const createThread = (message) => chatApi.post("/threads/", message);
 export const addMessageToThread = (message) =>

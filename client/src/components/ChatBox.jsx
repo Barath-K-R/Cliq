@@ -26,6 +26,8 @@ import {
 } from "../api/ChatApi";
 const ChatBox = ({
   chat,
+  setChats,
+  setCurrentChat,
   chatType,
   setSendMessage,
   receivedMessage,
@@ -363,12 +365,21 @@ const ChatBox = ({
             chat={chat}
             setMessages={setMessages}
             setchatSettingsOpened={setchatSettingsOpened}
+            setchatInfoModalOpened={setchatInfoModalOpened}
           />
         )}
       </div>
 
       {/* chat info */}
-      {chatInfoModalOpened && <ChatInfo currentChat={chat} setchatInfoModalOpened={setchatInfoModalOpened}/>}
+      {chatInfoModalOpened && (
+        <ChatInfo
+          currentChat={chat}
+          setChats={setChats}
+          setCurrentChat={setCurrentChat}
+          setMessages={setMessages}
+          setchatInfoModalOpened={setchatInfoModalOpened}
+        />
+      )}
 
       {/* members list */}
       {membersListModalOpened && (
@@ -391,24 +402,26 @@ const ChatBox = ({
                 "border border-gray-300 shadow-lg rounded-lg cursor-pointer"
               }`}
             >
-              <Message
-                index={index}
-                message={message}
-                setMessages={setMessages}
-                currentUser={currentUser}
-                isGroup={isGroup}
-                setreplyThread={setreplyThread}
-                setExpandedThreadHead={setExpandedThreadHead}
-                messageActionIndex={messageActionIndex}
-                setmessageActionIndex={setmessageActionIndex}
-                currentThreadMessages={currentThreadMessages}
-                onThreadClick={() => {
-                  if (message.is_thread_head) {
-                    updateExpandThreadHead(message);
-                    updateCurrentMessages(message);
-                  }
-                }}
-              />
+              {(message.is_thread_head || !message.thread_id) && (
+                <Message
+                  index={index}
+                  message={message}
+                  setMessages={setMessages}
+                  currentUser={currentUser}
+                  isGroup={isGroup}
+                  setreplyThread={setreplyThread}
+                  setExpandedThreadHead={setExpandedThreadHead}
+                  messageActionIndex={messageActionIndex}
+                  setmessageActionIndex={setmessageActionIndex}
+                  currentThreadMessages={currentThreadMessages}
+                  onThreadClick={() => {
+                    if (message.is_thread_head) {
+                      updateExpandThreadHead(message);
+                      updateCurrentMessages(message);
+                    }
+                  }}
+                />
+              )}
 
               {message.is_thread_head &&
                 expandedThreadHead?.id === message.id && (

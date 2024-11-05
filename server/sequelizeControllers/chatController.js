@@ -18,7 +18,7 @@ export const createChatSequelize = async (req, res) => {
     scope,
   } = req.body;
 
-  console.log(userIds);
+
   try {
     const num_of_users = userIds.length;
 
@@ -45,10 +45,17 @@ export const createChatSequelize = async (req, res) => {
       type: sequelize.QueryTypes.SELECT,
     });
 
-    console.log("finished");
+    
 
     if (chatExists.length > 0)
-      res.send({ message: "chat already exits", chatExists });
+      return res.send({ message: "chat already exits", chatExists });
+
+    const role = await RoleModel.findOne({
+      where: { name: 'member' },
+      attributes: ['id'],
+    });
+
+    const role_id = role ? role.id : null;
 
     if (chatType === "direct") {
       console.log("DIRECT");
@@ -59,8 +66,8 @@ export const createChatSequelize = async (req, res) => {
 
       // Add members to the chat
       await ChatMembersModel.bulkCreate([
-        { chat_id: newChat.id, user_id: currentUserId },
-        { chat_id: newChat.id, user_id: userIds[0] },
+        { chat_id: newChat.id, user_id: currentUserId,role_id},
+        { chat_id: newChat.id, user_id: userIds[0],role_id},
       ]);
 
       const newChatWithMembers = await ChatModel.findOne({
@@ -74,7 +81,7 @@ export const createChatSequelize = async (req, res) => {
         ],
       });
 
-      res.send({
+      return res.send({
         newChat: newChatWithMembers,
         message: "New chat created and users added.",
       });
@@ -88,13 +95,13 @@ export const createChatSequelize = async (req, res) => {
         description,
       });
 
-      console.log(newGroup);
       // Add members to the chat
       const groupMembers = userIds.map((user) => ({
         chat_id: newGroup.id,
         user_id: user,
+        role_id
       }));
-      groupMembers.push({ chat_id: newGroup.id, user_id: currentUserId });
+      groupMembers.push({ chat_id: newGroup.id, user_id: currentUserId,role_id });
 
       await ChatMembersModel.bulkCreate(groupMembers);
 
@@ -103,7 +110,7 @@ export const createChatSequelize = async (req, res) => {
         attributes: ["id", "name"],
       });
 
-      res.send({
+      return res.send({
         newChat: newGroupWithMembers,
         message: "New chat created and users were added successfully",
       });
@@ -121,8 +128,9 @@ export const createChatSequelize = async (req, res) => {
       const channelMembers = userIds.map((user) => ({
         chat_id: newChannel.id,
         user_id: user,
+        role_id
       }));
-      channelMembers.push({ chat_id: newChannel.id, user_id: currentUserId });
+      channelMembers.push({ chat_id: newChannel.id, user_id: currentUserId,role_id});
 
       await ChatMembersModel.bulkCreate(channelMembers);
 
@@ -131,16 +139,36 @@ export const createChatSequelize = async (req, res) => {
         attributes: ["id", "name"],
       });
 
-      res.send({
+      return res.send({
         newChat: newChannelWithMembers,
         message: "New chat created and users were added successfully",
       });
     }
   } catch (err) {
     console.error(err);
-    res
+    return res
       .status(500)
       .send({ error: "An error occurred while processing your request." });
+  }
+};
+
+export const deleteChat = async (req, res) => {
+  const { chatId } = req.params;
+
+  try {
+    // Check if the chat exists
+    const chat = await ChatModel.findByPk(chatId);
+    if (!chat) {
+      return res.status(404).json({ message: "Chat not found" });
+    }
+
+    // Delete the chat, cascading the deletion to related records
+    await chat.destroy();
+
+    return res.status(200).json({ message: "Chat and related data deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Failed to delete chat" });
   }
 };
 
@@ -209,10 +237,10 @@ export const getCurrentUserChatsSequelize = async (req, res) => {
       });
     }
     console.log(chats);
-    res.send(chats);
+    return res.send(chats);
   } catch (error) {
     console.error("Error fetching user chats:", error);
-    res.status(500).send({ error: "Internal Server Error" });
+    return res.status(500).send({ error: "Internal Server Error" });
   }
 };
 
@@ -228,9 +256,9 @@ export const getChatMembersSequelize = async (req, res) => {
           attributes: ["id", "username"],
         },
         {
-          model: RoleModel,
-          attributes: ["name"],
-        },
+          model:RoleModel,
+          attributes:["name"],
+        }
       ],
       attributes: ["user_id", "role_id", "joined_at"],
     });
@@ -248,20 +276,27 @@ export const addMembersToChat = async (req, res) => {
   try {
     const chat = await ChatModel.findByPk(chatId);
     if (!chat) {
-      res.status(404).send("chat not found");
+      return res.status(404).send("chat not found");
     }
 
     // Validate if the users exist
     const users = await UserModel.findAll({ where: { id: userIds } });
     if (users.length !== userIds.length) {
-      res.status(404).send("One or more users not found");
+      return res.status(404).send("One or more users not found");
     }
 
+    const role = await RoleModel.findOne({
+      where: { name: 'member' },
+      attributes: ['id'],
+    });
+
+    const role_id = role ? role.id : null;
+
     const groupIds = userIds.map((id) => {
-      return { chat_id: chatId, user_id: id };
+      return { chat_id: chatId, user_id: id,role_id};
     });
     const newMembers = await ChatMembersModel.bulkCreate(groupIds);
-    res.send(newMembers);
+    return res.send(newMembers);
   } catch (error) {
     console.error(error);
   }
@@ -270,17 +305,17 @@ export const addMembersToChat = async (req, res) => {
 export const removeMembersFromChat = async (req, res) => {
   const { chatId } = req.params;
   const { userIds } = req.body;
-  console.log(userIds);
+  console.log(userIds)
   try {
     const chat = await ChatModel.findByPk(chatId);
     if (!chat) {
-      res.status(404).send("chat not found");
+      return res.status(404).send("chat not found");
     }
 
     // Validate if the users exist
     const users = await UserModel.findAll({ where: { id: userIds } });
     if (users.length !== userIds.length) {
-      res.status(404).send("One or more users not found");
+      return res.status(404).send("One or more users not found");
     }
 
     const groupIds = userIds.map((id) => {
@@ -292,7 +327,7 @@ export const removeMembersFromChat = async (req, res) => {
       },
     });
 
-    res.send({
+    return res.send({
       removedMembers,
       message: "users were removed successfully from the chat",
     });
@@ -300,6 +335,7 @@ export const removeMembersFromChat = async (req, res) => {
     console.error(error);
   }
 };
+
 export const getRolePermissions = async (req, res) => {
   const { chatId, roleId } = req.params;
   console.log(chatId + " " + roleId);
@@ -317,8 +353,134 @@ export const getRolePermissions = async (req, res) => {
       ],
       attributes: ["chat_id", "role_id"],
     });
-    res.send(response);
+    return res.send(response);
   } catch (error) {
     console.log(error);
+  }
+};
+
+export const getAllRolePermissions = async (req, res) => {
+  const { chatId } = req.params; 
+  console.log("Fetching permissions for chatId: " + chatId);
+
+  try {
+    const response = await ChatPermissionModel.findAll({
+      where: {
+        chat_id: chatId,
+      },
+      include: [
+        {
+          model: PermissionModel,
+          attributes: ["name"], 
+        },
+        {
+          model: RoleModel, 
+          attributes: ["name"], 
+        },
+      ],
+      attributes: ["role_id"], 
+    });
+    
+    // Prepare flat results
+    const flatResults = response.map(item => ({
+      role_name: item.Role.name,
+      permission_name: item.Permission.name,
+    }));
+
+    console.log(flatResults);
+    
+    return res.json(flatResults);
+  } catch (error) {
+    console.error("Error fetching role permissions:", error);
+    return res.status(500).json({ error: "An error occurred while fetching permissions." });
+  }
+};
+
+
+export const addRolePermissions = async (req, res) => {
+  console.log(req.body);
+  const roles = req.body; 
+  const { chatId } = req.params;
+
+  try {
+    const roleMappings = {
+      admin: "admin",
+      moderator: "moderator",
+      member: "member",
+    };
+
+    for (const [role, newPermissions] of Object.entries(roles)) {
+     
+      const roleRecord = await RoleModel.findOne({
+        where: { name: roleMappings[role] },
+      });
+      if (!roleRecord) {
+        return res.status(400).json({ error:`Role ${role} not found.`});
+      }
+      const roleId = roleRecord.id;
+
+      
+      const currentPermissions = await ChatPermissionModel.findAll({
+        where: {
+          chat_id: chatId,
+          role_id: roleId,
+        },
+      });
+
+      
+      const currentPermissionNames = await Promise.all(
+        currentPermissions.map(async (permission) => {
+          const permRecord = await PermissionModel.findByPk(permission.permission_id);
+          return permRecord ? permRecord.name : null;
+        })
+      );
+
+      
+      const permissionsToAdd = newPermissions.filter(
+        (perm) => !currentPermissionNames.includes(perm)
+      );
+      const permissionsToRemove = currentPermissionNames.filter(
+        (perm) => !newPermissions.includes(perm)
+      );
+
+      
+      for (const permissionName of permissionsToAdd) {
+        const permissionRecord = await PermissionModel.findOne({
+          where: { name: permissionName },
+        });
+        if (permissionRecord) {
+          await ChatPermissionModel.findOrCreate({
+            where: {
+              chat_id: chatId,
+              role_id: roleId,
+              permission_id: permissionRecord.id,
+            },
+          });
+        }
+      }
+
+      
+      for (const permissionName of permissionsToRemove) {
+        const permissionRecord = await PermissionModel.findOne({
+          where: { name: permissionName },
+        });
+        if (permissionRecord) {
+          await ChatPermissionModel.destroy({
+            where: {
+              chat_id: chatId,
+              role_id: roleId,
+              permission_id: permissionRecord.id,
+            },
+          });
+        }
+      }
+    }
+
+    return res.status(200).json({ message: "Roles and permissions updated successfully." });
+  } catch (error) {
+    console.error("Error updating roles and permissions:", error);
+    return res
+      .status(500)
+      .json({ error: "An error occurred while updating roles and permissions." });
   }
 };

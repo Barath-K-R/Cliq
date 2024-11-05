@@ -26,9 +26,8 @@ const ChatMembersModel = sequelize.define(
     role_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: 6,
       references: {
-        model: "roles",
+        model:RoleModel,
         key: "id",
       },
     },
