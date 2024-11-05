@@ -10,13 +10,7 @@ import {
   deleteChat,
 } from "../api/ChatApi.js";
 
-const ChatInfo = ({
-  currentChat,
-  setCurrentChat,
-  setMessages,
-  setChats,
-  setchatInfoModalOpened,
-}) => {
+const ChatInfo = ({ currentChat,setCurrentChat, setMessages, setChats,setchatInfoModalOpened }) => {
   const permissionsTableRowActions = [
     "edit chat info",
     "add participants",
@@ -103,11 +97,9 @@ const ChatInfo = ({
     try {
       const chatDeleteResponse = await deleteChat(currentChat.chat_id);
 
-      setChats((prev) =>
-        prev.filter((chat) => chat.chat_id !== currentChat.chat_id)
-      );
-      setchatInfoModalOpened(false);
-      setCurrentChat(null);
+      setChats(prev=>prev.filter(chat=>chat.chat_id!==currentChat.chat_id))
+      setchatInfoModalOpened(false)
+      setCurrentChat(null)
       toast.success("Chat deleted successfully!", {
         position: "top-right",
       });

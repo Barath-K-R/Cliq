@@ -9,7 +9,7 @@ import {
   addMembersToChat,
   addRolePermissions,
   getAllRolePermissions,
-  deleteChat,
+  deleteChat
 } from "../sequelizeControllers/chatController.js";
 const chatRouter = express.Router();
 
