@@ -144,6 +144,26 @@ export const createChatSequelize = async (req, res) => {
   }
 };
 
+export const deleteChat = async (req, res) => {
+  const { chatId } = req.params;
+
+  try {
+    // Check if the chat exists
+    const chat = await ChatModel.findByPk(chatId);
+    if (!chat) {
+      return res.status(404).json({ message: "Chat not found" });
+    }
+
+    // Delete the chat, cascading the deletion to related records
+    await chat.destroy();
+
+    res.status(200).json({ message: "Chat and related data deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to delete chat" });
+  }
+};
+
 export const getCurrentUserChatsSequelize = async (req, res) => {
   console.log("getting current chats");
   try {
@@ -300,6 +320,7 @@ export const removeMembersFromChat = async (req, res) => {
     console.error(error);
   }
 };
+
 export const getRolePermissions = async (req, res) => {
   const { chatId, roleId } = req.params;
   console.log(chatId + " " + roleId);
@@ -320,5 +341,131 @@ export const getRolePermissions = async (req, res) => {
     res.send(response);
   } catch (error) {
     console.log(error);
+  }
+};
+
+export const getAllRolePermissions = async (req, res) => {
+  const { chatId } = req.params; 
+  console.log("Fetching permissions for chatId: " + chatId);
+
+  try {
+    const response = await ChatPermissionModel.findAll({
+      where: {
+        chat_id: chatId,
+      },
+      include: [
+        {
+          model: PermissionModel,
+          attributes: ["name"], 
+        },
+        {
+          model: RoleModel, 
+          attributes: ["name"], 
+        },
+      ],
+      attributes: ["role_id"], 
+    });
+    
+    // Prepare flat results
+    const flatResults = response.map(item => ({
+      role_name: item.Role.name,
+      permission_name: item.Permission.name,
+    }));
+
+    console.log(flatResults);
+    
+    res.json(flatResults);
+  } catch (error) {
+    console.error("Error fetching role permissions:", error);
+    res.status(500).json({ error: "An error occurred while fetching permissions." });
+  }
+};
+
+
+export const addRolePermissions = async (req, res) => {
+  console.log(req.body);
+  const roles = req.body; 
+  const { chatId } = req.params;
+
+  try {
+    const roleMappings = {
+      admin: "admin",
+      moderator: "moderator",
+      member: "member",
+    };
+
+    for (const [role, newPermissions] of Object.entries(roles)) {
+     
+      const roleRecord = await RoleModel.findOne({
+        where: { name: roleMappings[role] },
+      });
+      if (!roleRecord) {
+        return res.status(400).json({ error: `Role ${role} not found.` });
+      }
+      const roleId = roleRecord.id;
+
+      
+      const currentPermissions = await ChatPermissionModel.findAll({
+        where: {
+          chat_id: chatId,
+          role_id: roleId,
+        },
+      });
+
+      
+      const currentPermissionNames = await Promise.all(
+        currentPermissions.map(async (permission) => {
+          const permRecord = await PermissionModel.findByPk(permission.permission_id);
+          return permRecord ? permRecord.name : null;
+        })
+      );
+
+      
+      const permissionsToAdd = newPermissions.filter(
+        (perm) => !currentPermissionNames.includes(perm)
+      );
+      const permissionsToRemove = currentPermissionNames.filter(
+        (perm) => !newPermissions.includes(perm)
+      );
+
+      
+      for (const permissionName of permissionsToAdd) {
+        const permissionRecord = await PermissionModel.findOne({
+          where: { name: permissionName },
+        });
+        if (permissionRecord) {
+          await ChatPermissionModel.findOrCreate({
+            where: {
+              chat_id: chatId,
+              role_id: roleId,
+              permission_id: permissionRecord.id,
+            },
+          });
+        }
+      }
+
+      
+      for (const permissionName of permissionsToRemove) {
+        const permissionRecord = await PermissionModel.findOne({
+          where: { name: permissionName },
+        });
+        if (permissionRecord) {
+          await ChatPermissionModel.destroy({
+            where: {
+              chat_id: chatId,
+              role_id: roleId,
+              permission_id: permissionRecord.id,
+            },
+          });
+        }
+      }
+    }
+
+    res.status(200).json({ message: "Roles and permissions updated successfully." });
+  } catch (error) {
+    console.error("Error updating roles and permissions:", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while updating roles and permissions." });
   }
 };

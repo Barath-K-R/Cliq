@@ -169,14 +169,18 @@ const Home = () => {
           );
         })}
       </div>
-
-      <ChatBox
-        chat={currentChat}
-        chatType={chatType}
-        setSendMessage={setSendMessage}
-        receivedMessage={receivedMessage}
-        onlineUsers={onlineUsers}
-      />
+      {currentChat && (
+        <ChatBox
+          chat={currentChat}
+          setCurrentChat={setCurrentChat}
+          setChats={setChats}
+          chatType={chatType}
+          setSendMessage={setSendMessage}
+          receivedMessage={receivedMessage}
+          onlineUsers={onlineUsers}
+        />
+      )}
+      
     </div>
   );
 };

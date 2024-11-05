@@ -11,6 +11,7 @@ const ReadRecieptModel = sequelize.define(
         model: "messages",
         key: "id",
       },
+      onDelete: "CASCADE",
     },
     user_id: {
       type: DataTypes.INTEGER,

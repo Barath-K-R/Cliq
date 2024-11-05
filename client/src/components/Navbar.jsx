@@ -5,7 +5,7 @@ import { BsMessenger } from "react-icons/bs";
 const Navbar = () => {
   const currentUser = useSelector((state) => state.user.authUser);
   return (
-    <div className="flex justify-between w-screen h-10 pr-6 bg-blue-600">
+    <div className="flex justify-between w-full h-10 pr-6 bg-blue-600">
       <div className="flex items-center gap-2 ml-4">
         <BsMessenger size={22} />
         <h2>Cliq</h2>

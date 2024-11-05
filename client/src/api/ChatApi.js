@@ -3,6 +3,7 @@ import axios from "axios";
 const chatApi = axios.create({ baseURL: "http://localhost:5000" });
 
 export const createChat = (chatData) => chatApi.post("/chat", chatData);
+export const deleteChat=(chatId)=>chatApi.delete(`/chat/${chatId}`)
 export const userChats = (id, chatType) =>
   chatApi.get(`/chat/${id}?type=${chatType}`);
 export const retrieveMembers = (chatId) =>
@@ -15,6 +16,8 @@ export const removeMembersFromChat = (chatId, userIds) =>
     data: { userIds },
   });
 
+export const addRolePermissions=(chatId,permissions)=>chatApi.post(`/chat/${chatId}/permissions`,permissions)
+export const getAllRolePermissions=(chatId)=>chatApi.get(`/chat/${chatId}/permissions`);
 export const getRolePermissions = (chatId, roleId) =>
   chatApi.get(`/chat/${chatId}/permissions/${roleId}`);
 
