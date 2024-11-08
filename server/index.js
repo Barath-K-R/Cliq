@@ -57,6 +57,9 @@ app.use(cors());
   }
 })();
 
+app.get('/',(req,res)=>{
+  res.send('hi hello');
+})
 // Define routes
 app.use("/chat", chatRouter);
 app.use("/messages", messageRouter);

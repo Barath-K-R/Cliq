@@ -1,5 +1,5 @@
 import express from "express";
-import { createThread,addMessageToThread} from "../mysqlControllers/ThreadController.js";
+import { createThread,addMessageToThread} from "../sequelizeControllers/ThreadController.js";
 const ThreadRouter = express.Router();
 
 ThreadRouter.post('/',createThread)

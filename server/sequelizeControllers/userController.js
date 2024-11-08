@@ -1,7 +1,6 @@
 import UserModel from "../models/UserModel.js";
 import RefreshTokenModel from "../models/RefreshTokenModel.js";
 
-import jwt from "jsonwebtoken";
 
 export const addingUserSequelize = async (req, res) => {
   const { username, email, password } = req.body;

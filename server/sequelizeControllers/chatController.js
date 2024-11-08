@@ -484,3 +484,31 @@ export const addRolePermissions = async (req, res) => {
       .json({ error: "An error occurred while updating roles and permissions." });
   }
 };
+
+// In your controller file
+
+export const leaveChat = async (req, res) => {
+  console.log(req.body);
+  const { chatId,userId } = req.params;
+
+  try {
+    
+    const chatMember = await ChatMembersModel.findOne({
+      where: { chat_id: chatId, user_id: userId },
+    });
+
+    if (!chatMember) {
+      return res.status(404).json({ message: "User not found in the chat" });
+    }
+
+    
+    await ChatMembersModel.destroy({
+      where: { chat_id: chatId, user_id: userId },
+    });
+
+    return res.status(200).json({ message: "User successfully left the chat" });
+  } catch (error) {
+    console.error("Error leaving chat:", error);
+    return res.status(500).json({ message: "Failed to leave chat" });
+  }
+};

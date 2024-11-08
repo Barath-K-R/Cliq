@@ -72,6 +72,8 @@ chatApi.interceptors.response.use(
 
 export const createChat = (chatData) => chatApi.post("/chat", chatData);
 export const deleteChat=(chatId)=>chatApi.delete(`/chat/${chatId}`)
+export const leaveChat=(chatId,userId)=>chatApi.delete(`/chat/${chatId}/leave/${userId}`)
+
 export const userChats = (id, chatType) =>
   chatApi.get(`/chat/${id}?type=${chatType}`);
 export const retrieveMembers = (chatId) =>

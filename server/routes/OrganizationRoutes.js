@@ -1,9 +1,5 @@
 import express from "express";
 import {
-  createOrganization,
-  joinOrganization,
-} from "../mysqlControllers/organizationController.js";
-import {
   createOrganizationSequelize,
   joinOrganizationSequelize,
 } from "../sequelizeControllers/organizationController.js";

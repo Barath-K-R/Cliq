@@ -363,7 +363,7 @@ const ChatBox = ({
         {chatSettingsOpened && (
           <ChatSettings
             chat={chat}
-            setMessages={setMessages}
+            currentUser={currentUser}
             setchatSettingsOpened={setchatSettingsOpened}
             setchatInfoModalOpened={setchatInfoModalOpened}
           />

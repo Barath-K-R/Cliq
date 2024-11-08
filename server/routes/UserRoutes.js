@@ -1,11 +1,6 @@
 import express from "express";
 import verifyToken from "../middleware/verifyToken.js";
-import {
-  addingUser,
-  logingUser,
-  gettingUser,
-  getAllOrgusers,
-} from "../mysqlControllers/userController.js";
+
 
 import { addingUserSequelize,gettingUserSequelize,getAllOrgUsersSequelize} from "../sequelizeControllers/userController.js";
 const UserRouter = express.Router();

@@ -7,9 +7,10 @@ import {
   getChatMembersSequelize,
   getRolePermissions,
   addMembersToChat,
-  addRolePermissions,
+  addRolePermissions, 
   getAllRolePermissions,
-  deleteChat
+  deleteChat,
+  leaveChat
 } from "../sequelizeControllers/chatController.js";
 const chatRouter = express.Router();
 
@@ -19,9 +20,11 @@ chatRouter.delete("/:chatId", verifyToken, deleteChat);
 chatRouter.get("/:chatId/members", verifyToken, getChatMembersSequelize);
 chatRouter.post("/:chatId/members", verifyToken, addMembersToChat);
 chatRouter.delete("/:chatId/members", verifyToken, removeMembersFromChat);
+chatRouter.delete("/:chatId/leave/:userId",leaveChat)
 
 chatRouter.post("/:chatId/permissions", verifyToken, addRolePermissions);
 chatRouter.get("/:chatId/permissions", verifyToken, getAllRolePermissions);
 chatRouter.get("/:chatId/permissions/:roleId", verifyToken, getRolePermissions);
+
 
 export default chatRouter;
